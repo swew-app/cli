@@ -32,14 +32,14 @@ class Output
         '<red>' => "\e[38;5;9m",
         '<green>' => "\e[38;5;77m",
         '<yellow>' => "\e[38;5;11m",
-        '<blue>' => "\e[38;5;12m",
+        '<blue>' => "\e[38;5;27m",
         '<purple>' => "\e[38;5;13m",
         '<cyan>' => "\e[38;5;14m",
 
         '<bgRed>' => "\e[48;5;9m",
         '<bgGreen>' => "\e[48;5;77m",
         '<bgYellow>' => "\e[48;5;11m",
-        '<bgBlue>' => "\e[48;5;12m",
+        '<bgBlue>' => "\e[48;5;27m",
         '<bgPurple>' => "\e[48;5;13m",
         '<bgCyan>' => "\e[48;5;14m",
 

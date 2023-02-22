@@ -8,6 +8,16 @@ use Swew\Cli\Lib\Output;
 
 $output = new Output();
 
+/*
+for ($i = 0; $i <= 255; $i++) {
+    if ($i > 0 && $i % 8 === 0) {
+        $output->newLine();
+    }
+    $title = str_pad("  $i", 7, ' ');
+    $output->write($i, "\e[48;5;${i}m${title}</> ");
+}
+// */
+
 $list = [
     'Leo',
     'Mike',
@@ -25,21 +35,48 @@ $list = [
 ];
 
 // $answer = $output->select('Select value', $list);
-$answer = $output->choice('Select value', $list);
-
-dd($answer);
+// $answer = $output->choice('Select value', $list);
 
 // $output->info('PASS');
-
-// for ($i = 0; $i <= 255; $i++) {
-//     $output->write($i, "\t\e[48;5;${i}m${i}</>");
-
-//     if ($i > 0 && $i % 8 === 0) {
-//         $output->newLine();
-//     }
-// }
 
 // $answer = $output->ask('How are you?');
 // $answer = $output->secret('What You password?');
 
 // $output->writeLn($answer, '<red>%s</>');
+
+
+// $output->setAnsi(false);
+
+// $output->writeLn('New Ln');
+// $output->info('Hi info');
+// $output->warn('Hi warning');
+// $output->error('Hi error');
+// $output->newLine();
+// $output->writeLn('<s> highlight </>');
+
+/*
+$answer = $output->ask('How are you?');
+$output->writeLn($answer, '<red>%s</>');
+// */
+
+/*
+$output->table(
+['Name', 'Age', 'Weapon'],
+[
+['Leo', 22, 'Swords'],
+['Mike', 21.6, 'Nunchaks'],
+['Don', 21.9, 'Bo'],
+['Raphael', 21.5, 'Saii'],
+],
+);
+// */
+
+/*
+$total = 159;
+$bar = $output->createProgressBar($total);
+$bar->start();
+for ($i = 0; $i <= $total; $i++) {
+$bar->increment();
+usleep(10000);
+}
+$bar->finish();
