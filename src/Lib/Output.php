@@ -9,7 +9,8 @@ class Output
     private $output;
 
     private array $formats = [
-        '</>' => "\e[m", // reset
+        '</>' => "\e[m",
+        // reset
         '<b>' => "\e[1m",
         '<f>' => "\e[2m",
         '<i>' => "\e[3m",
@@ -109,5 +110,46 @@ class Output
     {
         $nl = str_repeat("\n", $countLines);
         $this->write($nl);
+    }
+
+    public function table(array $titles, array $lines): void
+    {
+        // Define the data to display in the table
+        $data = [
+            $titles,
+            ...$lines,
+        ];
+
+        // Determine the maximum width of each column
+        $columnWidths = [];
+        foreach ($data as $row) {
+            foreach ($row as $columnIndex => $value) {
+                $columnWidths[$columnIndex] = max(strlen(strval($value)), $columnWidths[$columnIndex] ?? 0);
+            }
+        }
+
+        // Output the table header
+        $line = '';
+        foreach ($data[0] as $columnIndex => $value) {
+            $line .= sprintf("%-{$columnWidths[$columnIndex]}s  ", $value);
+        }
+        $this->writeLn($line, '<blue>%s</>');
+
+        // Output the table separator
+        $line = '';
+        foreach ($columnWidths as $width) {
+            $line .= sprintf("%'-{$width}s  ", '');
+        }
+        $this->writeLn($line, '<blue>%s</>');
+
+        // Output the table rows
+        for ($i = 1; $i < count($data); $i++) {
+            $line = '';
+            foreach ($data[$i] as $columnIndex => $value) {
+                $line .= sprintf("%-{$columnWidths[$columnIndex]}s  ", $value);
+            }
+            $format = $i % 2 === 0 ? '<gray>%s</>' : '<white>%s</>';
+            $this->writeLn($line, $format);
+        }
     }
 }

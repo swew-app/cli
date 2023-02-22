@@ -12,9 +12,19 @@ it('Run', function () {
     // }
 
     // $output->writeLn('New Ln');
-    $output->info('Hi info');
-    $output->warn('Hi warning');
-    $output->error('Hi error');
-    $output->newLine();
-    $output->writeLn('<s> highlight </>');
+    // $output->info('Hi info');
+    // $output->warn('Hi warning');
+    // $output->error('Hi error');
+    // $output->newLine();
+    // $output->writeLn('<s> highlight </>');
+
+    $output->table(
+        ['Name', 'Age', 'Weapon'],
+        [
+            ['Leo', 22, 'Swords'],
+            ['Mike', 21.6, 'Nunchaks'],
+            ['Don', 21.9, 'Bo'],
+            ['Raphael', 21.5, 'Saii'],
+        ],
+    );
 });
