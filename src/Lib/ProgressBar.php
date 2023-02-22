@@ -24,7 +24,7 @@ class ProgressBar
         $this->output->write("\e[2K\r");
     }
 
-    public function increment()
+    public function increment(): void
     {
         $this->index++;
 

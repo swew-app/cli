@@ -7,10 +7,6 @@ use Swew\Cli\Lib\Output;
 it('Run', function () {
     $output = new Output();
 
-    // for ($i = 0; $i <= 255; $i++) {
-    //     $output->writeLn($i, "\e[38;5;${i}m ${i} </>");
-    // }
-
     // $output->setAnsi(false);
 
     // $output->writeLn('New Ln');

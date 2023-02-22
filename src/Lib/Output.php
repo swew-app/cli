@@ -28,14 +28,14 @@ class Output
         '<white>' => "\e[38;5;7m",
 
         '<red>' => "\e[38;5;9m",
-        '<green>' => "\e[38;5;40m",
+        '<green>' => "\e[38;5;77m",
         '<yellow>' => "\e[38;5;11m",
         '<blue>' => "\e[38;5;12m",
         '<purple>' => "\e[38;5;13m",
         '<cyan>' => "\e[38;5;14m",
 
         '<bgRed>' => "\e[48;5;9m",
-        '<bgGreen>' => "\e[48;5;40m",
+        '<bgGreen>' => "\e[48;5;77m",
         '<bgYellow>' => "\e[48;5;11m",
         '<bgBlue>' => "\e[48;5;12m",
         '<bgPurple>' => "\e[48;5;13m",
@@ -79,7 +79,7 @@ class Output
         return "\e]8;;${url}\a${text}\e]8;;\a";
     }
 
-    public function write(mixed $text, $format = '%s'): void
+    public function write(string|int|float $text, string $format = '%s'): void
     {
         $text = sprintf($format, $text);
 
@@ -92,7 +92,7 @@ class Output
         fwrite($this->output, $text);
     }
 
-    public function writeLn(mixed $text, $format = '%s'): void
+    public function writeLn(string|int|float $text, string $format = '%s'): void
     {
         $this->write($text, $format . "\n");
     }
@@ -182,7 +182,7 @@ class Output
         }
 
         $this->writeLn($question);
-        $this->write("<cyan>❯ </> ");
+        $this->write("<cyan>❯</> ");
 
         return trim(strval(fgets($this->input)));
     }
@@ -196,7 +196,7 @@ class Output
         }
 
         $this->writeLn($question);
-        $this->write("<cyan>❯ </> ");
+        $this->write("<yellow>❯</> ");
 
         system('stty -echo');
         $answer = trim(strval(fgets($this->input)));
