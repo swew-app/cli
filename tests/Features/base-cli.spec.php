@@ -18,6 +18,7 @@ it('Run', function () {
     // $output->newLine();
     // $output->writeLn('<s> highlight </>');
 
+    /*
     $output->table(
         ['Name', 'Age', 'Weapon'],
         [
@@ -27,4 +28,17 @@ it('Run', function () {
             ['Raphael', 21.5, 'Saii'],
         ],
     );
+    // */
+
+    /*
+    $total = 159;
+    $bar = $output->createProgressBar($total);
+
+    $bar->start();
+    for ($i = 0; $i <= $total; $i++) {
+        $bar->increment();
+        usleep(10000);
+    }
+    $bar->finish();
+    // */
 });

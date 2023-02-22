@@ -9,8 +9,9 @@ class Output
     private $output;
 
     private array $formats = [
-        '</>' => "\e[m",
         // reset
+        '</>' => "\e[m",
+
         '<b>' => "\e[1m",
         '<f>' => "\e[2m",
         '<i>' => "\e[3m",
@@ -151,5 +152,10 @@ class Output
             $format = $i % 2 === 0 ? '<gray>%s</>' : '<white>%s</>';
             $this->writeLn($line, $format);
         }
+    }
+
+    public function createProgressBar(int $count = 100): ProgressBar
+    {
+        return new ProgressBar($this, $count);
     }
 }
