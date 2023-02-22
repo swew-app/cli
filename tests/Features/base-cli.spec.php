@@ -11,8 +11,10 @@ it('Run', function () {
     //     $output->writeLn($i, "\e[38;5;${i}m ${i} </>");
     // }
 
+    $output->setAnsi(false);
+
     // $output->writeLn('New Ln');
-    // $output->info('Hi info');
+    $output->info('Hi info');
     // $output->warn('Hi warning');
     // $output->error('Hi error');
     // $output->newLine();

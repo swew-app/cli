@@ -39,6 +39,8 @@ class Output
         '<bgCyan>' => "\e[48;5;14m",
     ];
 
+    private bool $ansi = true;
+
     public function __construct()
     {
         $output = fopen('php://output', 'r');
@@ -77,7 +79,7 @@ class Output
 
         $text = str_replace(
             array_keys($this->formats),
-            array_values($this->formats),
+            $this->ansi ? array_values($this->formats) : '',
             $text
         );
 
@@ -157,5 +159,11 @@ class Output
     public function createProgressBar(int $count = 100): ProgressBar
     {
         return new ProgressBar($this, $count);
+    }
+
+    public function setAnsi(bool $ansi): self
+    {
+        $this->ansi = $ansi;
+        return $this;
     }
 }
