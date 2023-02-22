@@ -45,7 +45,11 @@ class Output
 
         '<saveCursor>' => "\e[s",
         '<restoreCursor>' => "\e[u",
+        '<eraseToEndLine>' => "\e[K",
+        '<eraseToStartLine>' => "\e[1K",
+        '<eraseLine>' => "\e[2K",
         '<eraseToBottom>' => "\e[J",
+        '<eraseToTop>' => "\e[1J",
     ];
 
     public function __construct()
@@ -84,7 +88,7 @@ class Output
         }
     }
 
-    public function link(string $url, string $text): string
+    public function getLink(string $url, string $text): string
     {
         return "\e]8;;${url}\a${text}\e]8;;\a";
     }
@@ -215,57 +219,99 @@ class Output
         return $answer;
     }
 
-    public function choice(string $text, array $options, int $selected = 0, bool $multipleSelections = false): string
+    public function choice(string $text, array $options, bool $isRequired = true): string
     {
+        $val = $this->select($text, $options, [], $isRequired, false);
+
+        return array_pop($val);
+    }
+
+    public function select(
+        string $text,
+        array $options,
+        array $selectedIndex = [],
+        bool $isRequired = true,
+        bool $isMultiple = true
+    ): array {
         $isInteractive = Helpers::isInteractiveInput($this->input);
+        $selected = array_fill_keys($selectedIndex, true);
 
         if (!$isInteractive) {
-            return $options[$selected];
+            return array_filter(
+                $options,
+                fn (int $index) => isset($selected[$index]),
+                ARRAY_FILTER_USE_KEY
+            );
         }
 
         $this->writeLn($text, '<cyan>%s</>');
 
+        $this->write('<saveCursor><eraseToBottom>');
+
         // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
         $this->exec('stty -icanon -echo');
 
-        $this->write('<saveCursor>');
+        $cursorIndex = 0;
 
         while (true) {
             $this->write('<restoreCursor><eraseToBottom>');
 
             $n = 7; // Count of showed options
-            $i = 0;
-            $drownCount = 0;
-
-            if ($selected > 3) {
-                $i = $selected - 3;
-            }
+            $i = max(0, $cursorIndex - 3);
+            $count = count($options);
+            $numberOfLinesDrawn = 0;
 
             // Output the options list
-            for (; ($i < count($options)); $i++) {
-                if ($i === $selected) {
+            for (; $i < $count && $numberOfLinesDrawn < $n; $i++) {
+                if ($i === $cursorIndex) {
                     $this->write('> ');
                 } else {
                     $this->write('  ');
                 }
 
-                $this->writeLn($options[$i], $i === $selected ? '<green><u>%s</>' : '%s');
+                $isSelected = isset($selected[$i]);
 
-                if (++$drownCount >= $n) {
-                    break;
+                if ($isMultiple) {
+                    $format = $isSelected ? '<green>✔</> <b>%s</>' : '<yellow>☐</> %s';
+                } else {
+                    $format = '%s';
                 }
+
+                $this->writeLn($options[$i], $format);
+                $numberOfLinesDrawn++;
             }
 
             // Wait for user input
             $key = ord(fread($this->input, 1));
 
             // Move the selection up or down based on user input
-            if ($key === 65) { // Up arrow
-                $selected = max(0, $selected - 1);
-            } elseif ($key === 66) { // Down arrow
-                $selected = min(count($options) - 1, $selected + 1);
-            } elseif ($key === 10) { // Enter key
-                break;
+            switch ($key) {
+                case 65: // Up arrow
+                    $cursorIndex = max(0, $cursorIndex - 1);
+                    break;
+                case 66: // Down arrow
+                    $cursorIndex = min(count($options) - 1, $cursorIndex + 1);
+                    break;
+                case 32: // Space
+                    if (isset($selected[$cursorIndex])) {
+                        unset($selected[$cursorIndex]);
+                    } else {
+                        $selected[$cursorIndex] = true;
+
+                        if (!$isMultiple) {
+                            break 2;
+                        }
+                    }
+                    break;
+                case 10: // Enter key
+                    if (!$isMultiple) {
+                        $selected[$cursorIndex] = true;
+                        break 2;
+                    }
+                    if ($isRequired && count($selected) === 0) {
+                        break;
+                    }
+                    break 2;
             }
         }
 
@@ -273,10 +319,14 @@ class Output
 
         $this->exec('stty ' . $this->sttyMode);
 
-        return $options[$selected];
+        return array_filter(
+            $options,
+            fn (int $index) => isset($selected[$index]),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
-    public function exec(string $command): bool|null|string
+    private function exec(string $command): bool|null|string
     {
         return execCommand($command);
     }

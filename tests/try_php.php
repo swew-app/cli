@@ -24,7 +24,10 @@ $list = [
     'Samurai',
 ];
 
+// $answer = $output->select('Select value', $list);
 $answer = $output->choice('Select value', $list);
+
+dd($answer);
 
 // $output->info('PASS');
 
@@ -39,4 +42,4 @@ $answer = $output->choice('Select value', $list);
 // $answer = $output->ask('How are you?');
 // $answer = $output->secret('What You password?');
 
-$output->writeLn($answer, '<red>%s</>');
+// $output->writeLn($answer, '<red>%s</>');
