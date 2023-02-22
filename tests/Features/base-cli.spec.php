@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Swew\Cli\Lib\Output;
+use Swew\Cli\Lib\Cli;
 
 it('Run', function () {
-    $output = new Output();
+    $output = new Cli();
 
     // for ($i = 0; $i <= 255; $i++) {
     //     $output->writeLn($i, "\e[38;5;${i}m ${i} </>");

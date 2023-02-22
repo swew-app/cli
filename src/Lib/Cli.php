@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Swew\Cli\Lib;
 
-class Output
+class Cli
 {
     private $output;
 
