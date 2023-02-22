@@ -11,6 +11,8 @@ class Output
 
     private bool $ansi = true;
 
+    private bool|null|string $sttyMode = null;
+
     private array $formats = [
         // reset
         '</>' => "\e[m",
@@ -40,6 +42,10 @@ class Output
         '<bgBlue>' => "\e[48;5;12m",
         '<bgPurple>' => "\e[48;5;13m",
         '<bgCyan>' => "\e[48;5;14m",
+
+        '<saveCursor>' => "\e[s",
+        '<restoreCursor>' => "\e[u",
+        '<eraseToBottom>' => "\e[J",
     ];
 
     public function __construct()
@@ -53,6 +59,7 @@ class Output
 
         $this->input = $input;
         $this->output = $output;
+        $this->sttyMode = $this->exec('stty -g');
     }
 
     public function __destruct()
@@ -62,6 +69,9 @@ class Output
         }
         if (is_resource($this->output)) {
             fclose($this->output);
+        }
+        if ($this->sttyMode) {
+            $this->exec('stty ' . $this->sttyMode);
         }
     }
 
@@ -198,10 +208,76 @@ class Output
         $this->writeLn($question);
         $this->write("<yellow>❯</> ");
 
-        system('stty -echo');
+        $this->exec('stty -echo');
         $answer = trim(strval(fgets($this->input)));
-        system('stty echo');
+        $this->exec('stty echo');
 
         return $answer;
+    }
+
+    public function choice(string $text, array $options, int $selected = 0, bool $multipleSelections = false): string
+    {
+        $isInteractive = Helpers::isInteractiveInput($this->input);
+
+        if (!$isInteractive) {
+            return $options[$selected];
+        }
+
+        $this->writeLn($text, '<cyan>%s</>');
+
+        // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
+        $this->exec('stty -icanon -echo');
+
+        $this->write('<saveCursor>');
+
+        while (true) {
+            $this->write('<restoreCursor><eraseToBottom>');
+
+            $n = 7; // Count of showed options
+            $i = 0;
+            $drownCount = 0;
+
+            if ($selected > 3) {
+                $i = $selected - 3;
+            }
+
+            // Output the options list
+            for (; ($i < count($options)); $i++) {
+                if ($i === $selected) {
+                    $this->write('> ');
+                } else {
+                    $this->write('  ');
+                }
+
+                $this->writeLn($options[$i], $i === $selected ? '<green><u>%s</>' : '%s');
+
+                if (++$drownCount >= $n) {
+                    break;
+                }
+            }
+
+            // Wait for user input
+            $key = ord(fread($this->input, 1));
+
+            // Move the selection up or down based on user input
+            if ($key === 65) { // Up arrow
+                $selected = max(0, $selected - 1);
+            } elseif ($key === 66) { // Down arrow
+                $selected = min(count($options) - 1, $selected + 1);
+            } elseif ($key === 10) { // Enter key
+                break;
+            }
+        }
+
+        $this->write('<restoreCursor><eraseToBottom>');
+
+        $this->exec('stty ' . $this->sttyMode);
+
+        return $options[$selected];
+    }
+
+    public function exec(string $command): bool|null|string
+    {
+        return execCommand($command);
     }
 }

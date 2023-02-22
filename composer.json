@@ -20,6 +20,9 @@
         "psr-4": {
             "Swew\\Cli\\": "src/"
         },
+        "files": [
+            "src/Functions/Functions.php"
+        ],
         "exclude-from-classmap": [
             "spec",
             "/Tests/",
@@ -34,9 +37,9 @@
     },
     "require-dev": {
         "laravel/pint": "v1.6.0",
-        "phpstan/phpstan": "^1.10",
-        "psalm/phar": "^5.7",
-        "swew/dd": "^1.0",
+        "phpstan/phpstan": "^1.10.1",
+        "psalm/phar": "^5.7.5",
+        "swew/dd": "^v1.0.0",
         "swew/test": "^v1.0.9"
     },
     "scripts": {

@@ -8,7 +8,25 @@ use Swew\Cli\Lib\Output;
 
 $output = new Output();
 
-$output->info('PASS');
+$list = [
+    'Leo',
+    'Mike',
+    'Raphael',
+    'Donatello',
+    'Joni',
+    'Splinter',
+    'April',
+    'Shredder',
+    'Bi Bop',
+    'RockSteady',
+    'Ninja',
+    'Web',
+    'Samurai',
+];
+
+$answer = $output->choice('Select value', $list);
+
+// $output->info('PASS');
 
 // for ($i = 0; $i <= 255; $i++) {
 //     $output->write($i, "\t\e[48;5;${i}m${i}</>");
@@ -21,4 +39,4 @@ $output->info('PASS');
 // $answer = $output->ask('How are you?');
 // $answer = $output->secret('What You password?');
 
-// $output->writeLn($answer, '<red>%s</>');
+$output->writeLn($answer, '<red>%s</>');

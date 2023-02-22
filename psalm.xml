@@ -6,14 +6,17 @@
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
     phpVersion="8.1"
+    findUnusedCode="false"
+    findUnusedBaselineEntry="false"
 >
     <projectFiles>
         <directory name="src" />
         <ignoreFiles>
             <directory name="vendor" />
+            <directory name="src/Functions" />
         </ignoreFiles>
     </projectFiles>
     <forbiddenFunctions>
-        <function name="dd"/>
+        <function name="shell_exec" />
     </forbiddenFunctions>
 </psalm>
