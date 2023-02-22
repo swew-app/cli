@@ -1,6 +1,6 @@
 {
     "ignore": ["vendor"],
-    "watch": ["src/App", "src/SWEW"],
+    "watch": ["src/", "tests/"],
     "exec": "composer test",
     "ext": "php",
     "delay": 1000

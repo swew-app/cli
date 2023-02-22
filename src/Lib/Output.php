@@ -1,0 +1,113 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Swew\Cli\Lib;
+
+class Output
+{
+    private $output;
+
+    private array $formats = [
+        '</>' => "\e[m", // reset
+        '<b>' => "\e[1m",
+        '<f>' => "\e[2m",
+        '<i>' => "\e[3m",
+        '<u>' => "\e[4m",
+        '<blink>' => "\e[5m",
+        '<hidden>' => "\e[8m",
+        '<s>' => "\e[9m",
+
+        '<black>' => "\e[38;5;0m",
+        '<gray>' => "\e[38;5;240m",
+        '<white>' => "\e[38;5;7m",
+
+        '<red>' => "\e[38;5;9m",
+        '<green>' => "\e[38;5;40m",
+        '<yellow>' => "\e[38;5;11m",
+        '<blue>' => "\e[38;5;12m",
+        '<purple>' => "\e[38;5;13m",
+        '<cyan>' => "\e[38;5;14m",
+
+        '<bgRed>' => "\e[48;5;9m",
+        '<bgGreen>' => "\e[48;5;40m",
+        '<bgYellow>' => "\e[48;5;11m",
+        '<bgBlue>' => "\e[48;5;12m",
+        '<bgPurple>' => "\e[48;5;13m",
+        '<bgCyan>' => "\e[48;5;14m",
+    ];
+
+    public function __construct()
+    {
+        $output = fopen('php://output', 'r');
+
+        if (!is_resource($output)) {
+            throw new \Exception('Wrong type for output');
+        }
+
+        $this->output = $output;
+    }
+
+    public function __destruct()
+    {
+        if (is_resource($this->output)) {
+            fclose($this->output);
+        }
+    }
+
+    public function clear(): void
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->write("\x1B[2J\x1B[0f");
+        } else {
+            $this->write("\x1B[2J\x1B[3J\x1B[H");
+        }
+    }
+
+    public function link(string $url, string $text): string
+    {
+        return "\e]8;;${url}\a${text}\e]8;;\a";
+    }
+
+    public function write(mixed $text, $format = '%s'): void
+    {
+        $text = sprintf($format, $text);
+
+        $text = str_replace(
+            array_keys($this->formats),
+            array_values($this->formats),
+            $text
+        );
+
+        fwrite($this->output, $text);
+    }
+
+    public function writeLn(mixed $text, $format = '%s'): void
+    {
+        $this->write($text, $format . "\n");
+    }
+
+    public function info(mixed $text): void
+    {
+        $format = '<bgGreen> INFO </> %s</>';
+        $this->writeLn($text, $format);
+    }
+
+    public function warn(mixed $text): void
+    {
+        $format = '<bgYellow> WARN </> %s</>';
+        $this->writeLn($text, $format);
+    }
+
+    public function error(mixed $text): void
+    {
+        $format = '<bgRed> ERROR </> %s</>';
+        $this->writeLn($text, $format);
+    }
+
+    public function newLine(int $countLines = 1): void
+    {
+        $nl = str_repeat("\n", $countLines);
+        $this->write($nl);
+    }
+}

@@ -1,8 +1,8 @@
 {
     "preloadFile": "",
     "paths": [
-        "**/*.spec.php",
-        "**/*.test.php"
+        "tests/**/*.spec.php",
+        "tests/**/*.test.php"
     ],
     "bail": false,
     "log": {
