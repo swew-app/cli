@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Swew\Cli\Lib;
+namespace Swew\Cli\Terminal;
 
 class ProgressBar
 {

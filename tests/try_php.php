@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Swew\Cli\Lib\Output;
+use Swew\Cli\Terminal\Output;
 
 $output = new Output();
 
