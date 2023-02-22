@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Swew\Cli\Lib;
 
-class Cli
+class Output
 {
+    private $input;
     private $output;
+
+    private bool $ansi = true;
 
     private array $formats = [
         // reset
@@ -39,21 +42,24 @@ class Cli
         '<bgCyan>' => "\e[48;5;14m",
     ];
 
-    private bool $ansi = true;
-
     public function __construct()
     {
+        $input = fopen('php://stdin', 'r');
         $output = fopen('php://output', 'r');
 
-        if (!is_resource($output)) {
-            throw new \Exception('Wrong type for output');
+        if (!is_resource($output) || !is_resource($input)) {
+            throw new \Exception('Wrong type for output or input');
         }
 
+        $this->input = $input;
         $this->output = $output;
     }
 
     public function __destruct()
     {
+        if (is_resource($this->input)) {
+            fclose($this->input);
+        }
         if (is_resource($this->output)) {
             fclose($this->output);
         }
@@ -165,5 +171,19 @@ class Cli
     {
         $this->ansi = $ansi;
         return $this;
+    }
+
+    public function ask(string $question, mixed $default = ''): string
+    {
+        $isInteractive = Helpers::isInteractiveInput($this->input);
+
+        if (!$isInteractive) {
+            return $default;
+        }
+
+        $this->writeLn($question);
+        $this->write("<cyan>❯ </> ");
+
+        return trim(strval(fgets($this->input)));
     }
 }

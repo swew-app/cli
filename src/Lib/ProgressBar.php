@@ -9,7 +9,7 @@ class ProgressBar
     private int $index = 0;
 
     public function __construct(
-        private readonly Cli $output,
+        private readonly Output $output,
         private int $total = 100,
     ) {
     }

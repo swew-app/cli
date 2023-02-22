@@ -2,23 +2,29 @@
 
 declare(strict_types=1);
 
-use Swew\Cli\Lib\Cli;
+use Swew\Cli\Lib\Output;
 
 it('Run', function () {
-    $output = new Cli();
+    $output = new Output();
 
     // for ($i = 0; $i <= 255; $i++) {
     //     $output->writeLn($i, "\e[38;5;${i}m ${i} </>");
     // }
 
-    $output->setAnsi(false);
+    // $output->setAnsi(false);
 
     // $output->writeLn('New Ln');
-    $output->info('Hi info');
+    // $output->info('Hi info');
     // $output->warn('Hi warning');
     // $output->error('Hi error');
     // $output->newLine();
     // $output->writeLn('<s> highlight </>');
+
+    //*
+    $answer = $output->ask('How are you?');
+
+    $output->writeLn($answer, '<red>%s</>');
+    // */
 
     /*
     $output->table(
