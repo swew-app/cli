@@ -186,4 +186,22 @@ class Output
 
         return trim(strval(fgets($this->input)));
     }
+
+    public function secret(string $question, mixed $default = ''): string
+    {
+        $isInteractive = Helpers::isInteractiveInput($this->input);
+
+        if (!$isInteractive) {
+            return $default;
+        }
+
+        $this->writeLn($question);
+        $this->write("<cyan>❯ </> ");
+
+        system('stty -echo');
+        $answer = trim(strval(fgets($this->input)));
+        system('stty echo');
+
+        return $answer;
+    }
 }
