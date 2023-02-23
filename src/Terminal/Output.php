@@ -223,7 +223,7 @@ class Output
     {
         $val = $this->select($text, $options, [], $isRequired, false);
 
-        return array_pop($val);
+        return current($val);
     }
 
     public function select(
