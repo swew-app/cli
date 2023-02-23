@@ -21,6 +21,13 @@ enum ArgType
 
     public function val(mixed $val): mixed
     {
+        if (is_array($val)) {
+            return array_map(
+                fn ($v) => $this->val($v),
+                $val
+            );
+        }
+
         return match ($this) {
             ArgType::Int => intval($val),
             ArgType::Str => strval($val),

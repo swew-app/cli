@@ -8,10 +8,16 @@ class CommandArgument
 {
     private array $names = [];
 
+    private mixed $parsedValue = null;
+
+    private ?ArgType $currentType = null;
+
     private readonly string $declaration;
 
-    public function __construct(string $declaration)
-    {
+    public function __construct(
+        string $declaration,
+        private readonly int $commandIndex = 0
+    ) {
         $this->declaration = trim($declaration);
 
         $part = current(explode('=', $this->getFirstPart(), 2));
@@ -39,9 +45,84 @@ class CommandArgument
         return strpos($str, '=') === false;
     }
 
+    public function parseInput(array $args): void
+    {
+        $isCommand = !$this->isArgument();
+
+        if ($isCommand) {
+            $this->setValue($args[$this->commandIndex]);
+            return;
+        }
+
+        $isFind = false;
+
+        // Loop through the arguments and parse them
+        foreach ($args as $arg) {
+            if ($isFind) {
+                $this->setValue($arg);
+                $isFind = false;
+                continue;
+            }
+
+            // Check if the argument is a command (starts with -- or -)
+            if (strpos($arg, '-') === 0) {
+                $isFind = false;
+
+                // Remove the -- or - from the beginning of the command
+                $command = ltrim($arg, '-');
+
+                // Check if the command has a value (contains =)
+                if (strpos($command, '=') !== false) {
+                    // Split the command into the command name and value
+                    $list = explode('=', $command, 2);
+
+                    $name = $list[0];
+                    $value = $list[1] ?? '';
+
+                    if ($this->is($name)) {
+                        $this->setValue($value);
+                        continue;
+                    }
+                } else {
+                    if ($this->is($command)) {
+                        $isFind = true;
+
+                        if ($this->getType() === ArgType::Bool) {
+                            $this->setValue(true);
+                            $isFind = false;
+                        }
+
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    public function setValue(mixed $val): void
+    {
+        if ($this->isArray()) {
+            if (!is_array($this->parsedValue)) {
+                $this->parsedValue = [];
+            }
+            if (is_array($val)) {
+                $this->parsedValue += $val;
+            } else {
+                $this->parsedValue[] = $val;
+            }
+        } else {
+            $this->parsedValue = $val;
+        }
+    }
+
     public function getValue(): mixed
     {
         $type = $this->getType();
+
+        if (!is_null($this->parsedValue)) {
+            return $type->val($this->parsedValue);
+        }
+
         $part = $this->getFirstPart();
 
         if (strpos($part, '=') === false) {
@@ -54,20 +135,37 @@ class CommandArgument
         return $type->val($part);
     }
 
+    public function isArray(): bool
+    {
+        $part = $this->getFirstPart();
+
+        if (strpos($part, '=') === false) {
+            return false;
+        }
+
+        $list = explode('=', $part, 2);
+
+        return ($list[1] ?? '') === '[]';
+    }
+
     public function getType(): ArgType
     {
-        $part = current(explode(':', $this->declaration, 2));
+        if (is_null($this->currentType)) {
+            $part = current(explode(':', $this->declaration, 2));
+            preg_match('/\((.*?)\)/', $part, $matches);
 
-        preg_match('/\((.*?)\)/', $part, $matches);
-
-        if (isset($matches[1])) {
-            return match ($matches[1]) {
-                'int' => ArgType::Int,
-                'str' => ArgType::Str,
-                'bool' => ArgType::Bool,
-            };
+            if (isset($matches[1])) {
+                $this->currentType = match ($matches[1]) {
+                    'int' => ArgType::Int,
+                    'str' => ArgType::Str,
+                    'bool' => ArgType::Bool,
+                };
+            } else {
+                $this->currentType = ArgType::Str;
+            }
         }
-        return ArgType::Str;
+
+        return $this->currentType;
     }
 
     public function getDescription(): string

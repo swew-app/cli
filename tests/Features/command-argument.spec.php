@@ -71,16 +71,6 @@ it('CommandArgument getValue 3', function () {
 
     expect($arg->getValue())->toBe(3);
 });
-
-it('CommandArgument getValue parse 1', function () {
-    $str = '--count|-C=3 (int) : Count of mails: 3';
-    $arg = new CommandArgument($str);
-
-    // $arg->parseInput(' -C 2');
-
-    expect($arg->getValue())->toBe(2);
-})->todo();
-
 //*/
 
 //*
@@ -134,5 +124,93 @@ it('CommandArgument is 4', function () {
     expect($arg->is('count'))->toBe(true);
     expect($arg->is('C'))->toBe(true);
     expect($arg->is('other'))->toBe(false);
+});
+// */
+
+//*
+it('CommandArgument isArray 1', function () {
+    $str = '--id=[] : Desc';
+    $arg = new CommandArgument($str);
+
+    expect($arg->isArray())->toBe(true);
+});
+
+it('CommandArgument isArray 2', function () {
+    $str = '--id=';
+    $arg = new CommandArgument($str);
+
+    expect($arg->isArray())->toBe(false);
+});
+
+it('CommandArgument isArray 3', function () {
+    $str = '--id ';
+    $arg = new CommandArgument($str);
+
+    expect($arg->isArray())->toBe(false);
+});
+// */
+
+//*
+it('CommandArgument parseInput 1.1', function () {
+    $str = 'id';
+    $arg = new CommandArgument($str);
+
+    $arg->parseInput(['123']);
+
+    expect($arg->getValue())->toBe('123');
+});
+
+it('CommandArgument parseInput 1.2', function () {
+    $str = '--id';
+    $arg = new CommandArgument($str);
+
+    $arg->parseInput(['some text', '--id', '123', '-c=2']);
+
+    expect($arg->getValue())->toBe('123');
+});
+
+it('CommandArgument parseInput 2.1', function () {
+    $str = 'id=[]';
+    $arg = new CommandArgument($str);
+
+    $arg->parseInput(['456']);
+
+    expect($arg->getValue())->toBe(['456']);
+});
+
+it('CommandArgument parseInput 2.2', function () {
+    $str = '-id=[]';
+    $arg = new CommandArgument($str);
+
+    $arg->parseInput(['-id', '456']);
+
+    expect($arg->getValue())->toBe(['456']);
+});
+
+it('CommandArgument parseInput 3.1', function () {
+    $str = '-s (bool)';
+    $arg = new CommandArgument($str);
+
+    $arg->parseInput(['--id', '123', '-s']);
+
+    expect($arg->getValue())->toBe(true);
+});
+
+it('CommandArgument parseInput 3.2', function () {
+    $str = '-s (bool)';
+    $arg = new CommandArgument($str);
+
+    $arg->parseInput(['--id', '123']);
+
+    expect($arg->getValue())->toBe(false);
+});
+
+it('CommandArgument parseInput 4.1', function () {
+    $str = '-ls=[] (bool)';
+    $arg = new CommandArgument($str);
+
+    $arg->parseInput(['--ls']);
+
+    expect($arg->getValue())->toBe([true]);
 });
 // */

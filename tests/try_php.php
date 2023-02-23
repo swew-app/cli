@@ -5,6 +5,12 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use Swew\Cli\Terminal\Output;
+use Swew\Cli\Command\CommandArgument;
+
+$arg = new CommandArgument('send:mail {mail} {-name=} {-id=}');
+
+$arg->parseInput(array_slice($argv, 1));
+
 
 $output = new Output();
 
