@@ -1,7 +1,7 @@
 {
     "ignore": ["vendor"],
     "watch": ["src/", "tests/"],
-    "exec": "composer test -- -f argument",
+    "exec": "composer test -- -f -parser",
     "ext": "php",
     "delay": 1000
 }
