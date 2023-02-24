@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Swew\Cli\Terminal\Output;
 use Swew\Cli\Command\CommandArgument;
+use Swew\Cli\Testing\TestHelper;
+use Swew\Cli\Terminal\Output;
 
 $arg = new CommandArgument('send:mail {mail} {-name=} {-id=}');
 
-$arg->parseInput(array_slice($argv, 1));
-
+// $arg->parseInput(array_slice($argv, 1));
 
 $output = new Output();
 
-/*
+// $output->write('123!!!');
+
+
+// /*
 for ($i = 0; $i <= 255; $i++) {
     if ($i > 0 && $i % 8 === 0) {
         $output->newLine();

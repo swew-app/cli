@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-function execCommand(string $command): bool|null|string
-{
-    return shell_exec($command);
+if (!function_exists('__execCommand')) {
+    function __execCommand(string $command): bool|null|string
+    {
+        return shell_exec($command);
+    }
 }

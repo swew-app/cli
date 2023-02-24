@@ -26,22 +26,22 @@ class Output
         '<s>' => "\e[9m",
 
         '<black>' => "\e[38;5;0m",
-        '<gray>' => "\e[38;5;240m",
+        '<gray>' => "\e[38;5;8m",
         '<white>' => "\e[38;5;7m",
 
-        '<red>' => "\e[38;5;9m",
-        '<green>' => "\e[38;5;77m",
-        '<yellow>' => "\e[38;5;11m",
-        '<blue>' => "\e[38;5;27m",
-        '<purple>' => "\e[38;5;13m",
-        '<cyan>' => "\e[38;5;14m",
+        '<red>' => "\e[38;5;1m",
+        '<green>' => "\e[38;5;2m",
+        '<yellow>' => "\e[38;5;3m",
+        '<blue>' => "\e[38;5;4m",
+        '<purple>' => "\e[38;5;5m",
+        '<cyan>' => "\e[38;5;6m",
 
-        '<bgRed>' => "\e[48;5;9m",
-        '<bgGreen>' => "\e[48;5;77m",
-        '<bgYellow>' => "\e[48;5;11m",
-        '<bgBlue>' => "\e[48;5;27m",
-        '<bgPurple>' => "\e[48;5;13m",
-        '<bgCyan>' => "\e[48;5;14m",
+        '<bgRed>' => "\e[48;5;1m",
+        '<bgGreen>' => "\e[48;5;2m",
+        '<bgYellow>' => "\e[48;5;3m",
+        '<bgBlue>' => "\e[48;5;4m",
+        '<bgPurple>' => "\e[48;5;5m",
+        '<bgCyan>' => "\e[48;5;6m",
 
         '<saveCursor>' => "\e[s",
         '<restoreCursor>' => "\e[u",
@@ -52,13 +52,13 @@ class Output
         '<eraseToTop>' => "\e[1J",
     ];
 
-    public function __construct()
+    public function __construct(mixed $stdin = null, mixed $stdout = null)
     {
-        $input = fopen('php://stdin', 'r');
-        $output = fopen('php://output', 'r');
+        $input = $stdin ?? fopen('php://stdin', 'r');
+        $output = $stdout ?? fopen('php://output', 'r');
 
         if (!is_resource($output) || !is_resource($input)) {
-            throw new \Exception('Wrong type for output or input');
+            throw new \Exception("Wrong type for \$output:($output) or \$input:($input) stream");
         }
 
         $this->input = $input;
@@ -189,7 +189,7 @@ class Output
 
     public function ask(string $question, mixed $default = ''): string
     {
-        $isInteractive = Helpers::isInteractiveInput($this->input);
+        $isInteractive = $this->isInteractiveInput($this->input);
 
         if (!$isInteractive) {
             return $default;
@@ -203,7 +203,7 @@ class Output
 
     public function secret(string $question, mixed $default = ''): string
     {
-        $isInteractive = Helpers::isInteractiveInput($this->input);
+        $isInteractive = $this->isInteractiveInput($this->input);
 
         if (!$isInteractive) {
             return $default;
@@ -233,7 +233,7 @@ class Output
         bool $isRequired = true,
         bool $isMultiple = true
     ): array {
-        $isInteractive = Helpers::isInteractiveInput($this->input);
+        $isInteractive = $this->isInteractiveInput($this->input);
         $selected = array_fill_keys($selectedIndex, true);
 
         if (!$isInteractive) {
@@ -328,6 +328,29 @@ class Output
 
     private function exec(string $command): bool|null|string
     {
-        return execCommand($command);
+        return __execCommand($command);
+    }
+
+    private function isInteractiveInput(mixed $inputStream): bool
+    {
+        if ('php://stdin' !== (stream_get_meta_data($inputStream)['uri'] ?? null)) {
+            return false;
+        }
+
+        if (\function_exists('stream_isatty')) {
+            return @stream_isatty(fopen('php://stdin', 'r'));
+        }
+
+        if (\function_exists('posix_isatty')) {
+            return @posix_isatty(fopen('php://stdin', 'r'));
+        }
+
+        if (!\function_exists('exec')) {
+            return true;
+        }
+
+        exec('stty 2> /dev/null', $output, $status);
+
+        return 1 !== $status;
     }
 }
