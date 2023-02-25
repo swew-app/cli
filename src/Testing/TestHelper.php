@@ -17,17 +17,18 @@ class TestHelper
         $this->output = fopen('php://memory', 'w+');
     }
 
-    public static function getOutput(bool $ansi = false): Output
+    public static function createOutput(bool $ansi = false): Output
     {
         $self = new self();
-        return $self->createOutput($ansi);
+        return $self->getOutput($ansi);
     }
 
-    public function createOutput(bool $ansi = false): Output
+    public function getOutput(bool $ansi = false): Output
     {
         $output = new Output(
             $this->input,
-            $this->output
+            $this->output,
+            false
         );
 
         $output->setAnsi($ansi);

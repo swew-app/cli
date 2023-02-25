@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Swew\Cli;
 
+use Swew\Cli\Command\CommandArgument;
 use Swew\Cli\Command\CommandParser;
 use Swew\Cli\Terminal\Output;
 
@@ -43,18 +44,49 @@ class SwewCommander
         }
     }
 
-    public function getCommand(string $name): object
+    public function getCommand(string $name, bool $stopOnError = true): object
     {
         if (isset($this->commands[$name])) {
+            /** @var Command */
             $command = new $this->commands[$name]();
-            // TODO: парсим аргументы в массив CommandArguments, передавая массив $args
-            // TODO: Валидируем
+
+            $this->fillCommandArguments($command, array_slice($this->argList, 1));
+
+            if (!$command->isValid()) {
+                $errorMessage = $command->getErrorMessage();
+                $this->output->error($errorMessage);
+
+                if ($stopOnError) {
+                    exit($command::ERROR);
+                } else {
+                    throw new \Exception("Get error for command '$name': $errorMessage");
+                }
+            }
+
             $command->setOutput($this->output);
             $command->init();
+
             return $command;
         }
 
         throw new \LogicException("Command '$name' not found");
+    }
+
+    protected function fillCommandArguments(Command &$command, array $argsForCommand): void
+    {
+        /** @var string */
+        $name = $command::NAME;
+        preg_match_all('/{([^}]+)}/', $name, $matches);
+
+        $commandArguments = [];
+
+        foreach ($matches[1] as $index => $arg) {
+            $cmdArg = new CommandArgument($arg, $index);
+            $cmdArg->parseInput($argsForCommand);
+            $commandArguments[] = $cmdArg;
+        }
+
+        $command->setCommandArguments($commandArguments);
     }
 
     protected function isNeedHelp(): bool

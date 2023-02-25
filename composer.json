@@ -46,7 +46,7 @@
         "test": "t",
         "serve": "php -S localhost:8080 -t public/",
         "static": "./vendor/psalm/phar/psalm.phar --no-cache",
-        "stan": "vendor/bin/phpstan analyse src",
+        "stan": "vendor/bin/phpstan analyse src --level=5",
         "code-check": "./vendor/bin/pint",
         "check": [
             "@static",

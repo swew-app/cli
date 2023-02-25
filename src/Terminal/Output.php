@@ -52,8 +52,11 @@ class Output
         '<eraseToTop>' => "\e[1J",
     ];
 
-    public function __construct(mixed $stdin = null, mixed $stdout = null)
-    {
+    public function __construct(
+        mixed $stdin = null,
+        mixed $stdout = null,
+        private readonly bool $useExec = true
+    ) {
         $input = $stdin ?? fopen('php://stdin', 'r');
         $output = $stdout ?? fopen('php://output', 'r');
 
@@ -328,12 +331,16 @@ class Output
 
     private function exec(string $command): bool|null|string
     {
+        if ($this->useExec === false) {
+            return null;
+        }
+
         return __execCommand($command);
     }
 
     private function isInteractiveInput(mixed $inputStream): bool
     {
-        if ('php://stdin' !== (stream_get_meta_data($inputStream)['uri'] ?? null)) {
+        if ('php://stdin' !== (stream_get_meta_data($inputStream)['uri'])) {
             return false;
         }
 

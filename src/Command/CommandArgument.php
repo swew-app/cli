@@ -39,6 +39,15 @@ class CommandArgument
         return in_array($name, $this->names, true);
     }
 
+    public function isValid(): bool
+    {
+        if ($this->isRequired() && is_null($this->parsedValue)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function isRequired(): bool
     {
         $str = current(explode(':', $this->declaration, 2));
@@ -159,6 +168,7 @@ class CommandArgument
                     'int' => ArgType::Int,
                     'str' => ArgType::Str,
                     'bool' => ArgType::Bool,
+                    default => throw new \LogicException("Wrong type of cli argument: $part"),
                 };
             } else {
                 $this->currentType = ArgType::Str;
@@ -176,6 +186,17 @@ class CommandArgument
             return trim(end($parts));
         }
         return '';
+    }
+
+    public function getErrorMessage(): string
+    {
+        $name = $this->names[0];
+
+        if ($this->isArgument()) {
+            $name = "-${name}";
+        }
+
+        return "<b>$name</> - is required";
     }
 
     public function isArgument(): bool
