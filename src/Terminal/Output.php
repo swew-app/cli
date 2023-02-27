@@ -13,45 +13,6 @@ class Output
 
     private bool|null|string $sttyMode = null;
 
-    private array $formats = [
-        // reset
-        '</>' => "\e[m",
-
-        '<b>' => "\e[1m",
-        '<f>' => "\e[2m",
-        '<i>' => "\e[3m",
-        '<u>' => "\e[4m",
-        '<blink>' => "\e[5m",
-        '<hidden>' => "\e[8m",
-        '<s>' => "\e[9m",
-
-        '<black>' => "\e[38;5;0m",
-        '<gray>' => "\e[38;5;8m",
-        '<white>' => "\e[38;5;7m",
-
-        '<red>' => "\e[38;5;1m",
-        '<green>' => "\e[38;5;2m",
-        '<yellow>' => "\e[38;5;3m",
-        '<blue>' => "\e[38;5;4m",
-        '<purple>' => "\e[38;5;5m",
-        '<cyan>' => "\e[38;5;6m",
-
-        '<bgRed>' => "\e[48;5;1m",
-        '<bgGreen>' => "\e[48;5;2m",
-        '<bgYellow>' => "\e[48;5;3m",
-        '<bgBlue>' => "\e[48;5;4m",
-        '<bgPurple>' => "\e[48;5;5m",
-        '<bgCyan>' => "\e[48;5;6m",
-
-        '<saveCursor>' => "\e[s",
-        '<restoreCursor>' => "\e[u",
-        '<eraseToEndLine>' => "\e[K",
-        '<eraseToStartLine>' => "\e[1K",
-        '<eraseLine>' => "\e[2K",
-        '<eraseToBottom>' => "\e[J",
-        '<eraseToTop>' => "\e[1J",
-    ];
-
     public function __construct(
         mixed $stdin = null,
         mixed $stdout = null,
@@ -96,15 +57,12 @@ class Output
         return "\e]8;;${url}\a${text}\e]8;;\a";
     }
 
+
     public function write(string|int|float $text, string $format = '%s'): void
     {
         $text = sprintf($format, $text);
 
-        $text = str_replace(
-            array_keys($this->formats),
-            $this->ansi ? array_values($this->formats) : '',
-            $text
-        );
+        $text = $this->format($text);
 
         fwrite($this->output, $text);
     }
@@ -359,5 +317,53 @@ class Output
         exec('stty 2> /dev/null', $output, $status);
 
         return 1 !== $status;
+    }
+
+    private function format(string $text): string
+    {
+        $formats = [
+            // reset
+            '</>' => "\e[m",
+
+            '<b>' => "\e[1m",
+            '<f>' => "\e[2m",
+            '<i>' => "\e[3m",
+            '<u>' => "\e[4m",
+            '<blink>' => "\e[5m",
+            '<hidden>' => "\e[8m",
+            '<s>' => "\e[9m",
+
+            '<black>' => "\e[38;5;0m",
+            '<gray>' => "\e[38;5;8m",
+            '<white>' => "\e[38;5;7m",
+
+            '<red>' => "\e[38;5;1m",
+            '<green>' => "\e[38;5;2m",
+            '<yellow>' => "\e[38;5;3m",
+            '<blue>' => "\e[38;5;4m",
+            '<purple>' => "\e[38;5;5m",
+            '<cyan>' => "\e[38;5;6m",
+
+            '<bgRed>' => "\e[48;5;1m",
+            '<bgGreen>' => "\e[48;5;2m",
+            '<bgYellow>' => "\e[48;5;3m",
+            '<bgBlue>' => "\e[48;5;4m",
+            '<bgPurple>' => "\e[48;5;5m",
+            '<bgCyan>' => "\e[48;5;6m",
+
+            '<saveCursor>' => "\e[s",
+            '<restoreCursor>' => "\e[u",
+            '<eraseToEndLine>' => "\e[K",
+            '<eraseToStartLine>' => "\e[1K",
+            '<eraseLine>' => "\e[2K",
+            '<eraseToBottom>' => "\e[J",
+            '<eraseToTop>' => "\e[1J",
+        ];
+
+        return str_replace(
+            array_keys($formats),
+            $this->ansi ? array_values($formats) : '',
+            $text
+        );
     }
 }

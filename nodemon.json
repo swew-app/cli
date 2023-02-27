@@ -1,7 +1,7 @@
 {
     "ignore": ["vendor"],
     "watch": ["src/", "tests/"],
-    "exec": "composer test -- -f swew-command",
+    "exec": "composer test -- -f spec",
     "ext": "php",
     "delay": 1000
 }

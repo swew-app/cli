@@ -16,44 +16,82 @@ class TestSwewCommander extends SwewCommander
     }
 }
 
-//
-
-it('SwewCommander :setCommands :getCommand', function () {
-    $args = ['send:mail', 'user@mail.com', '--count', '1', '-silent'];
+function testFactory(array $args, ?array $commands = null): array
+{
     $helper = new TestHelper();
-    $sc = new TestSwewCommander($args, $helper->getOutput());
+    $sc = new TestSwewCommander($args, $helper->getOutput(), false);
 
-    $sc->setCommands([
+    $sc->setCommands($commands ?? [
         SendMailCommand::class,
     ]);
 
-    // expect(fn() => $sc->getCommand('send:mail', false))->not()->toThrow("Get error for command 'send:mail': <b>-tax</> - is required");
+    $sc->run();
 
-    $command = $sc->getCommand('send:mail', false);
-    $command();
+    return [
+        'SwewCommander' => $sc,
+        'TestHelper' => $helper,
+    ];
+}
+
+// = = = = = = = = = = = = =
+
+it('SwewCommander :setCommands :getCommand', function () {
+    $args = ['send:mail', 'user@mail.com', '--count', '1', '-silent'];
+
+    [
+        'SwewCommander' => $sc,
+        'TestHelper' => $helper,
+    ] = testFactory($args);
 
     expect($helper->getOutputContentAndClear())->toBe('Email sended');
 });
 
 it('SwewCommander :setCommands :getCommand - with error', function () {
     $args = ['send:mail', 'user@mail.com', '--count', '1'];
-    $helper = new TestHelper();
-    $sc = new TestSwewCommander($args, $helper->getOutput());
 
-    $sc->setCommands([
-        SendMailCommand::class,
-    ]);
-
-    expect(fn () => $sc->getCommand('send:mail', false))->not()->toThrow("Get error for command 'send:mail': <b>-tax</> - is required");
+    expect(fn () => testFactory($args))->not()->toThrow("Get error for command 'send:mail': <b>-tax</> - is required");
 });
 
 
-it('SwewCommander :isNeedHelp 1', function () {
-    //
-})->todo();
-it('SwewCommander :showHelp 1', function () {
-    //
-})->todo();
-it('SwewCommander :getHelpMessage 1', function () {
-    //
-})->todo();
+it('SwewCommander :isNeedHelp :showHelp - Commander', function () {
+    $args = ['-h'];
+
+    [
+        'SwewCommander' => $sc,
+        'TestHelper' => $helper,
+    ] = testFactory($args);
+
+    $msg = <<<MSG
+Available commands:
+ send:mail: Command to send email
+
+MSG;
+
+    expect($helper->getOutputContentAndClear())->toBe($msg);
+});
+
+it('SwewCommander :isNeedHelp :showHelp - Command', function () {
+    $args = ['send:mail', '-h'];
+
+    [
+        'SwewCommander' => $sc,
+        'TestHelper' => $helper,
+    ] = testFactory($args);
+
+    $msg = <<<MSG
+Description:
+ Command to send email
+
+Usage:
+ send:mail [options]
+
+Options:
+ email
+ -count      Count of mails
+ -id         User ids
+ -silent,-S  No log message
+
+MSG;
+
+    expect($helper->getOutputContentAndClear())->toBe($msg);
+});

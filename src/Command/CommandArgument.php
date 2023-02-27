@@ -196,11 +196,22 @@ class CommandArgument
             $name = "-${name}";
         }
 
-        return "<b>$name</> - is required";
+        return '<b>' . $this->getNames() . '</> - is required';
     }
 
     public function isArgument(): bool
     {
         return $this->declaration[0] === '-';
+    }
+
+    public function getNames(): string
+    {
+        return implode(
+            ',',
+            array_map(
+                fn ($n) => ($this->isArgument() ? "-$n" : $n),
+                $this->names
+            )
+        );
     }
 }
