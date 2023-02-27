@@ -9,7 +9,7 @@ use Swew\Cli\Terminal\Output;
 
 class SwewCommander
 {
-    private array $commands = [];
+    protected array $commands = [];
 
     private string $helpPrefix = '';
 

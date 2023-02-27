@@ -1,14 +1,35 @@
 {
     "name": "swew/cli",
-    "description": "Cli package",
+    "description": "A command-line interface program with formatting and text entry functions.",
+    "version": "1.0.0",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "cli",
+        "command-line",
+        "console",
+        "formatting",
+        "group",
+        "input",
+        "output",
+        "program",
+        "prompt",
+        "terminal",
+        "text",
+        "tool",
+        "utility"
+    ],
     "authors": [
         {
             "name": "AVIL13",
             "email": "avil@swew.app"
         }
     ],
+    "archive": {
+        "exclude": [
+            "tests/*"
+        ]
+    },
     "config": {
         "platform": {
             "php": "8.1"

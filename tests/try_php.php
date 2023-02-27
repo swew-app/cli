@@ -16,7 +16,7 @@ $output = new Output();
 // $output->write('123!!!');
 
 
-// /*
+/*
 for ($i = 0; $i <= 255; $i++) {
     if ($i > 0 && $i % 8 === 0) {
         $output->newLine();
@@ -80,7 +80,7 @@ $output->table(
 // */
 
 /*
-$total = 159;
+$total = 259;
 $bar = $output->createProgressBar($total);
 $bar->start();
 for ($i = 0; $i <= $total; $i++) {

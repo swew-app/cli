@@ -11,7 +11,8 @@ class ProgressBar
     public function __construct(
         private readonly Output $output,
         private int $total = 100,
-    ) {
+    )
+    {
     }
 
     public function start(): void
@@ -34,7 +35,7 @@ class ProgressBar
             $progress = 100;
         }
 
-        $line = "\r[" . str_repeat('▓', intval($progress / 2)) . str_repeat('░', 50 - intval($progress / 2)) . "] $progress%";
+        $line = "\r <green>" . str_repeat('▓', intval($progress / 2)) . '</>' . str_repeat('░', 50 - intval($progress / 2)) . " $progress%";
 
         $this->output->write($line);
     }

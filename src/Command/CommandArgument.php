@@ -168,7 +168,7 @@ class CommandArgument
                     'int' => ArgType::Int,
                     'str' => ArgType::Str,
                     'bool' => ArgType::Bool,
-                    default => throw new \LogicException("Wrong type of cli argument: $part"),
+                    default => throw new \RuntimeException("Wrong type of cli argument: $part"),
                 };
             } else {
                 $this->currentType = ArgType::Str;
