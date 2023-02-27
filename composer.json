@@ -1,7 +1,6 @@
 {
     "name": "swew/cli",
-    "description": "A command-line interface program with formatting and text entry functions.",
-    "version": "1.0.0",
+    "description": "A lightweight, fast, and secure PHP library for interacting with databases, creating migrations, and running queries. SWEW/DB uses prepared statements to protect against SQL injection attacks and supports multiple database systems.",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -62,7 +61,6 @@
     },
     "scripts": {
         "test": "t",
-        "serve": "php -S localhost:8080 -t public/",
         "static": "./vendor/psalm/phar/psalm.phar --no-cache",
         "stan": "vendor/bin/phpstan analyse src --level=5",
         "code-check": "./vendor/bin/pint",
