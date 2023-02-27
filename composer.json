@@ -55,8 +55,8 @@
     },
     "require-dev": {
         "laravel/pint": "v1.6.0",
-        "phpstan/phpstan": "^1.10.1",
-        "psalm/phar": "^5.7.5",
+        "phpstan/phpstan": "^1.10.3",
+        "psalm/phar": "^5.7.6",
         "swew/dd": "^v1.0.0",
         "swew/test": "^v1.0.9"
     },
