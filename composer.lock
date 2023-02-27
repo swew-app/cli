@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "10f9b8e0d55ae42bc2027b0cc33a0974",
+    "content-hash": "981de3d3690af5bded753f57fe8c0b4d",
     "packages": [],
     "packages-dev": [
         {
@@ -75,16 +75,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.1",
+            "version": "1.10.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "1cd5fc530a8b68702f3733ad64294b2a39564198"
+                "reference": "5419375b5891add97dc74be71e6c1c34baaddf64"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1cd5fc530a8b68702f3733ad64294b2a39564198",
-                "reference": "1cd5fc530a8b68702f3733ad64294b2a39564198",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/5419375b5891add97dc74be71e6c1c34baaddf64",
+                "reference": "5419375b5891add97dc74be71e6c1c34baaddf64",
                 "shasum": ""
             },
             "require": {
@@ -114,7 +114,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/1.10.1"
+                "source": "https://github.com/phpstan/phpstan/tree/1.10.3"
             },
             "funding": [
                 {
@@ -130,20 +130,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-21T21:57:23+00:00"
+            "time": "2023-02-25T14:47:13+00:00"
         },
         {
             "name": "psalm/phar",
-            "version": "5.7.5",
+            "version": "5.7.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/psalm/phar.git",
-                "reference": "3068432d968407f18fb8c509ae423a754967a3bd"
+                "reference": "4a7fc6f671a9e8c44c81ea35a1a1978d40e95478"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/psalm/phar/zipball/3068432d968407f18fb8c509ae423a754967a3bd",
-                "reference": "3068432d968407f18fb8c509ae423a754967a3bd",
+                "url": "https://api.github.com/repos/psalm/phar/zipball/4a7fc6f671a9e8c44c81ea35a1a1978d40e95478",
+                "reference": "4a7fc6f671a9e8c44c81ea35a1a1978d40e95478",
                 "shasum": ""
             },
             "require": {
@@ -163,9 +163,9 @@
             "description": "Composer-based Psalm Phar",
             "support": {
                 "issues": "https://github.com/psalm/phar/issues",
-                "source": "https://github.com/psalm/phar/tree/5.7.5"
+                "source": "https://github.com/psalm/phar/tree/5.7.6"
             },
-            "time": "2023-02-21T16:18:05+00:00"
+            "time": "2023-02-24T19:50:34+00:00"
         },
         {
             "name": "swew/dd",
