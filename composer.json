@@ -9,14 +9,11 @@
         "command-line",
         "console",
         "formatting",
-        "group",
         "input",
         "output",
         "program",
         "prompt",
         "terminal",
-        "text",
-        "tool",
         "utility"
     ],
     "authors": [
