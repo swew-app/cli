@@ -11,14 +11,20 @@ class SwewCommander
 {
     protected array $commands = [];
 
+    private array $commandMap = [];
+
     private string $helpPrefix = '';
 
+    private readonly array $argList;
+
     public function __construct(
-        private readonly array $argList,
+        array $argv,
         private readonly Output $output = new Output(),
         private readonly bool $stopByStatus = true
-    )
-    {
+    ) {
+        $this->argList = array_slice($argv, 1);
+
+        $this->setCommands($this->commands);
     }
 
     public function run(): void
@@ -31,7 +37,15 @@ class SwewCommander
         /** @var Command */
         $command = $this->getCommand($this->argList[0]);
 
-        $status = $command();
+
+        if ($command->isValid()) {
+            $command->init();
+            $status = $command();
+        } else {
+            $status = $command::ERROR;
+            $errorMessage = $command->getErrorMessage();
+            $this->output->error($errorMessage);
+        }
 
         if ($this->stopByStatus) {
             exit($status);
@@ -43,37 +57,25 @@ class SwewCommander
         $this->helpPrefix = $helpPrefix;
     }
 
-    public function setCommands(array $commands): void
+    protected function setCommands(array $commands): void
     {
-        $this->commands = [];
+        $this->commandMap = [];
 
         foreach ($commands as $commandClass) {
             $name = $this->parseName($commandClass);
-            $this->commands[$name] = $commandClass;
+            $this->commandMap[$name] = $commandClass;
         }
     }
 
-    public function getCommand(string $name): object
+    protected function getCommand(string $name): object
     {
-        if (isset($this->commands[$name])) {
+        if (isset($this->commandMap[$name])) {
             /** @var Command */
-            $command = new $this->commands[$name]();
-
-            $this->fillCommandArguments($command, array_slice($this->argList, 1));
-
-            if (!$command->isValid()) {
-                $errorMessage = $command->getErrorMessage();
-                $this->output->error($errorMessage);
-
-                if ($this->stopByStatus) {
-                    exit($command::ERROR);
-                } else {
-                    throw new \Exception("Get error for command '$name': $errorMessage");
-                }
-            }
+            $command = new $this->commandMap[$name]();
 
             $command->setOutput($this->output);
-            $command->init();
+
+            $this->fillCommandArguments($command, array_slice($this->argList, 1));
 
             return $command;
         }
@@ -104,7 +106,10 @@ class SwewCommander
             return true;
         }
 
-        return in_array('-h', $this->argList) || in_array('-help', $this->argList) || in_array('--help', $this->argList);
+        return in_array('-h', $this->argList)
+            || in_array('-help', $this->argList)
+            || in_array('--help', $this->argList)
+            || in_array('help', $this->argList);
     }
 
     protected function showHelp(): void
@@ -115,9 +120,9 @@ class SwewCommander
             $name = $this->argList[0];
         }
 
-        if (isset($this->commands[$name])) {
+        if (isset($this->commandMap[$name])) {
             /** @var Command */
-            $class = new $this->commands[$name]();
+            $class = new $this->commandMap[$name]();
 
             $this->fillCommandArguments($class, []);
         } else {
@@ -140,7 +145,7 @@ class SwewCommander
         $result[] = '<yellow>Available commands:</>';
 
         // проходим по списку комманд и собираем название и десприпшен
-        foreach ($this->commands as $commandClass) {
+        foreach ($this->commandMap as $commandClass) {
             $name = $this->parseName($commandClass);
             $description = $commandClass::DESCRIPTION;
 
@@ -156,6 +161,7 @@ class SwewCommander
             $str = constant($str . '::NAME');
         }
 
+        $str = str_replace("\n", '', $str);
         $spacePos = strpos($str, ' ');
         if ($spacePos === false) {
             return $str;

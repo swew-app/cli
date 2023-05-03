@@ -58,7 +58,7 @@ class CommandArgument
     {
         $isCommand = !$this->isArgument();
 
-        if ($isCommand) {
+        if ($isCommand && isset($args[$this->commandIndex])) {
             $this->setValue($args[$this->commandIndex]);
             return;
         }
