@@ -76,7 +76,7 @@ require __DIR__.'/vendor/autoload.php';
 
 use My\Cli\MySuperCli;
 
-(new MySuperCli())->run();
+(new MySuperCli($argv))->run();
 ```
 ```sh
 php index.php 'show:time at'
@@ -169,6 +169,96 @@ const NAME = 'send:email {--count|-C=1          (int) : Count of mails}';
           // command | argument|alias|default | type | description
 ```
 
+---
+
+# Writing Output
+
+## write / writeLn / info / warn / error
+
+![write demo](assets/write-img.avif)
+
+```php
+$this->output->write('Hello ');
+$this->output->write('world', '<b>%s <br></>'); // formatting
+
+$this->output->writeLn('Hello'); // write with new line
+$this->output->writeLn('world', '<b>%s <br></>');
+
+$this->output->info('Some good news');
+$this->output->warn('A little attention');
+$this->output->error('Something has gone wrong');
+
+$this->output->clear(); // Reset terminal window
+```
+
+## Width / Height
+```php
+$this->output->width();
+$this->output->height();
+```
+
+## Formatting
+
+```php
+$this->output->write('<b><black><bgRed>Hello world</>');
+
+// OR
+$format = '<b><black><bgRed>%s</>';
+$this->output->write('Hello world', $format);
+```
+
+### Symbols
+
+- `</>` - escape
+- `<br>` - new line
+- `<b>` - bold
+- `<u>` - underline
+
+### Colors
+
+| Color| Background Color|
+|---|---|
+| `<black>`  | `<bgBlack>`
+| `<gray>`   | `<bgGray>`
+| `<white>`  | `<bgWhite>`
+| `<red>`    | `<bgRed>`
+| `<green>`  | `<bgGreen>`
+| `<yellow>` | `<bgYellow>`
+| `<blue>`   | `<bgBlue>`
+| `<purple>` | `<bgPurple>`
+| `<cyan>`   | `<bgCyan>`
+
+### Cursors
+
+- `<saveCursor>`
+- `<restoreCursor>`
+- `<eraseToEndLine>`
+- `<eraseToStartLine>`
+- `<eraseLine>`
+- `<eraseToBottom>`
+- `<eraseToTop>`
+
+## Without formatting
+
+If you do not want to use formatting, specify this
+
+```php
+$this->output->setAnsi(false);
+```
+
+## Empty lines
+```php
+// Write a single blank line...
+$this->output->newLine(); 
+// Write three blank lines...
+$this->output->newLine(3);
+```
+
+## Link
+```php
+$this->output->getLink($url, $text);
+```
+
 # Prompting For Input
 
 ## ask
@@ -239,67 +329,32 @@ $this->output->table($title, $list);
 ```php
 $bar = $this->output->createProgressBar(count($users)); 
 
-$bar->start(); 
+$bar->start(); // show progress bar
 
 foreach ($users as $user) {
 	$this->someTask($user);
 
-	$bar->increment();
+	$bar->increment(); // progress
 }
 
-$bar->finish();
+$bar->finish(); // remove progressbar
 ```
 
 
-# Writing Output
+# Output
 
-## write / writeLn / info / warn / error
+If you only need output to the console, you can use the `Output` class separately.
+
 ```php
-$this->output->write('Hello');
+<?php
 
-$this->output->writeLn('world'); // write with new line
+require __DIR__ . '/../vendor/autoload.php';
 
-$this->output->info('Some good news');
+use Swew\Cli\Terminal\Output;
 
-$this->output->warn('A little attention');
+$output = new Output();
 
-$this->output->error('Something has gone wrong');
+$output->writeLn('Hello world!');
 
-$this->output->clear(); // Reset terminal window
-```
 
-## Formatting
-```php
-$this->output->write('<b><black><bgRed>Hello world</>');
-
-// OR
-$format = '<b><black><bgRed>%s</>';
-$this->output->write('Hello world', $format);
-
-```
-
-### Symbols
-
-- `</>` - escape
-- `<b>` - bold
-- `<u>` - underline
-- `<href=https://github.com/swew-app>` - link
-
-### Colors
-
-- `<black>`
-- `<white>`
-- `<red>`
-- `<green>`
-- `<yellow>`
-- `<blue>`
-- `<purple>`
-- `<cyan>`
-
-## Empty lines
-```php
-// Write a single blank line...
-$this->output->newLine(); 
-// Write three blank lines...
-$this->output->newLine(3);
 ```

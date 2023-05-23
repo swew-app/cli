@@ -11,9 +11,21 @@ $arg = new CommandArgument('send:mail {mail} {-name=} {-id=}');
 
 // $arg->parseInput(array_slice($argv, 1));
 
+
 $output = new Output();
 
-// $output->write('123!!!');
+$output->choice(
+    'What is your name?',
+    ['Leo', 'Mike', 'Don', 'Raph'],
+    $isRequired = true // optional
+);
+dd($output);
+// $output->writeLn("Hello $name");
+
+
+// $link = $output->getLink('https://swew.app', 'SWEW Site');
+// $output->writeLn($link);
+
 
 
 /*

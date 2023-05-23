@@ -54,7 +54,7 @@ class Output
 
     public function getLink(string $url, string $text): string
     {
-        return "\e]8;;${url}\a${text}\e]8;;\a";
+        return "\e]8;;$url\a$text\e]8;;\a";
     }
 
 
@@ -287,6 +287,16 @@ class Output
         );
     }
 
+    public function width(): int
+    {
+        return (int) trim(strval($this->exec('tput cols')));
+    }
+
+    public function height(): int
+    {
+        return (int) trim(strval($this->exec('tput lines')));
+    }
+
     private function exec(string $command): bool|null|string
     {
         if ($this->useExec === false) {
@@ -324,6 +334,7 @@ class Output
         $formats = [
             // reset
             '</>' => "\e[m",
+            '<br>' => "\n",
 
             '<b>' => "\e[1m",
             '<f>' => "\e[2m",
@@ -336,7 +347,6 @@ class Output
             '<black>' => "\e[38;5;0m",
             '<gray>' => "\e[38;5;8m",
             '<white>' => "\e[38;5;7m",
-
             '<red>' => "\e[38;5;1m",
             '<green>' => "\e[38;5;2m",
             '<yellow>' => "\e[38;5;3m",
@@ -344,6 +354,9 @@ class Output
             '<purple>' => "\e[38;5;5m",
             '<cyan>' => "\e[38;5;6m",
 
+            '<bgBlack>' => "\e[48;5;0m",
+            '<bgGray>' => "\e[48;5;8m",
+            '<bgWhite>' => "\e[48;5;7m",
             '<bgRed>' => "\e[48;5;1m",
             '<bgGreen>' => "\e[48;5;2m",
             '<bgYellow>' => "\e[48;5;3m",
