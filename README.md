@@ -96,8 +96,6 @@ The class must also have two obligatory constants.
 
 As a result of the execution of the command should return the result - the status code. If all was successful, it is `0`.
 
-Translated with www.DeepL.com/Translator (free version)
-
 ```php
 class SendEmail extends Command
 {
