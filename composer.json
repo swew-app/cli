@@ -1,6 +1,6 @@
 {
     "name": "swew/cli",
-    "description": "A lightweight, fast, and secure PHP library for interacting with databases, creating migrations, and running queries. SWEW/DB uses prepared statements to protect against SQL injection attacks and supports multiple database systems.",
+    "description": "Swew/CLI: A PHP package for streamlined command line interface (CLI) development, providing an intuitive API for creating custom commands, handling input/output, and executing command logic effortlessly. Simplify your CLI application development with Swew/CLI's rapid development capabilities and enhanced user experience features.",
     "type": "library",
     "license": "MIT",
     "keywords": [
