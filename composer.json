@@ -1,6 +1,6 @@
 {
     "name": "swew/cli",
-    "description": "Swew/CLI: A PHP package for streamlined command line interface (CLI) development, providing an intuitive API for creating custom commands, handling input/output, and executing command logic effortlessly. Simplify your CLI application development with Swew/CLI's rapid development capabilities and enhanced user experience features.",
+    "description": "SWEW/CLI: A PHP package for streamlined command line interface (CLI) development, providing an intuitive API for creating custom commands, handling input/output, and executing command logic effortlessly. Simplify your CLI application development with rapid development.",
     "type": "library",
     "license": "MIT",
     "keywords": [
