@@ -53,11 +53,11 @@
         "php": ">=8.1"
     },
     "require-dev": {
-        "laravel/pint": "v1.6.0",
-        "phpstan/phpstan": "^1.10.3",
-        "psalm/phar": "^5.7.6",
-        "swew/dd": "^v1.0.0",
-        "swew/test": "^v1.0.9"
+        "laravel/pint": "v1.9.0",
+        "phpstan/phpstan": "^1.10.14",
+        "psalm/phar": "^5.9.0",
+        "swew/dd": "v1.3.0",
+        "swew/test": "v1.3.1"
     },
     "scripts": {
         "test": "t",

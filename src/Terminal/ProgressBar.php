@@ -11,8 +11,7 @@ class ProgressBar
     public function __construct(
         private readonly Output $output,
         private int $total = 100,
-    )
-    {
+    ) {
     }
 
     public function start(): void

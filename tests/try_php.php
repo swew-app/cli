@@ -11,9 +11,26 @@ $arg = new CommandArgument('send:mail {mail} {-name=} {-id=}');
 
 // $arg->parseInput(array_slice($argv, 1));
 
-$output = new Output();
 
-// $output->write('123!!!');
+$output = new Output();
+$output->writeLn("\n\n");
+
+$bar = $output->createProgressBar(5);
+
+$bar->start(); // show progress bar
+
+foreach ([1,2,3,4,5] as $user) {
+    sleep(1);
+	$bar->increment(); // progress
+}
+
+$bar->finish(); // remove progressbar
+$output->writeLn("\n\n");
+
+
+// $link = $output->getLink('https://swew.app', 'SWEW Site');
+// $output->writeLn($link);
+
 
 
 /*
