@@ -225,9 +225,9 @@ class Output
             // Output the options list
             for (; $i < $count && $numberOfLinesDrawn < $n; $i++) {
                 if ($i === $cursorIndex) {
-                    $this->write('> ');
+                    $this->write('🞊 ');
                 } else {
-                    $this->write('  ');
+                    $this->write('🞅 ');
                 }
 
                 $isSelected = isset($selected[$i]);

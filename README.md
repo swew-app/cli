@@ -280,6 +280,11 @@ public function __invoke(): int {
 ```
 
 ## Choice Question
+
+|||
+|---|---|
+![choice-name](assets/choice-name.avif) | ![choice-name-result](assets/choice-name-result.avif)
+
 ```php
 public function __invoke(): int {
 	/** @var string */
@@ -289,12 +294,17 @@ public function __invoke(): int {
 		$isRequired = true // optional
 	);
 
+    $this->output->writeLn($answer);
+
 	// ...
 	return self::SUCCESS;
 }
 ```
 
 ## Choice Multiple
+
+![select-name](assets/select-name.avif)
+
 ```php
 public function __invoke(): int {
 	/** @var array */
@@ -312,6 +322,9 @@ public function __invoke(): int {
 ```
 
 ## Tables
+
+![table](assets/table.avif)
+
 ```php
 $title = ['Name', 'Age', 'Weapon'];
 
@@ -326,6 +339,9 @@ $this->output->table($title, $list);
 ```
 
 ## Progress bar
+
+![Progress bar](assets/progress-bar.avif)
+
 ```php
 $bar = $this->output->createProgressBar(count($users)); 
 

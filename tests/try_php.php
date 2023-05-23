@@ -13,14 +13,19 @@ $arg = new CommandArgument('send:mail {mail} {-name=} {-id=}');
 
 
 $output = new Output();
+$output->writeLn("\n\n");
 
-$output->choice(
-    'What is your name?',
-    ['Leo', 'Mike', 'Don', 'Raph'],
-    $isRequired = true // optional
-);
-dd($output);
-// $output->writeLn("Hello $name");
+$bar = $output->createProgressBar(5);
+
+$bar->start(); // show progress bar
+
+foreach ([1,2,3,4,5] as $user) {
+    sleep(1);
+	$bar->increment(); // progress
+}
+
+$bar->finish(); // remove progressbar
+$output->writeLn("\n\n");
 
 
 // $link = $output->getLink('https://swew.app', 'SWEW Site');
