@@ -329,7 +329,7 @@ class Output
         return 1 !== $status;
     }
 
-    private function format(string $text): string
+    public function format(string $text): string
     {
         $formats = [
             // reset
