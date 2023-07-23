@@ -25,6 +25,17 @@ class SwewCommander
         $this->argList = array_slice($argv, 1);
 
         $this->setCommands($this->commands);
+
+        $this->init();
+    }
+
+    /**
+     * Method called when creating
+     *
+     * @return void
+     */
+    protected function init(): void
+    {
     }
 
     public function run(): void
