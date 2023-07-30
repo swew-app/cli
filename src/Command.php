@@ -117,7 +117,7 @@ abstract class Command
         return implode("\n", $result);
     }
 
-    final public function arg(string $name): ?CommandArgument
+    final public function arg(string $name): CommandArgument
     {
         foreach ($this->commandArguments as $arg) {
             if ($arg->is($name)) {
@@ -125,7 +125,7 @@ abstract class Command
             }
         }
 
-        return null;
+        throw new \LogicException("Can't find argument '$name'");
     }
 
     final public function argv(string $key): mixed
