@@ -27,7 +27,9 @@ class Output
 
         $this->input = $input;
         $this->output = $output;
-        $this->sttyMode = $this->exec('stty -g');
+        if (stream_isatty($this->output)) {
+            $this->sttyMode = $this->exec('stty -g');
+        }
     }
 
     public function __destruct()
@@ -148,7 +150,7 @@ class Output
         return $this;
     }
 
-    public function ask(string $question, mixed $default = ''): string
+    public function ask(string $question, string $default = ''): string
     {
         $isInteractive = $this->isInteractiveInput($this->input);
 
@@ -160,6 +162,57 @@ class Output
         $this->write("<cyan>❯</> ");
 
         return trim(strval(fgets($this->input)));
+    }
+
+    public function askYesNo(string $question, bool $answer = false, string $yes = 'Yes', string $no = 'No'): bool
+    {
+        $isInteractive = $this->isInteractiveInput($this->input);
+
+        if (!$isInteractive) {
+            return $answer;
+        }
+
+        $this->writeLn($question, ' <cyan>%s</>');
+
+        $this->write('<saveCursor><eraseToBottom>');
+
+        // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
+        $this->exec('stty -icanon -echo');
+
+        while (true) {
+            $this->write('<restoreCursor><eraseToBottom>');
+            if ($answer) {
+                $line = "  <green><u><b>$yes</>  <gray>$no</>";
+            } else {
+                $line = "  <gray>$yes</>  <green><u><b>$no</>";
+            }
+            $this->writeLn($line);
+
+            // Wait for user input
+            $key = ord(fread($this->input, 1));
+
+            $this->write('<restoreCursor>');
+
+            // Move the selection up or down based on user input
+            switch ($key) {
+                case 65: // Up arrow
+                case 66: // Down arrow
+                case 67: // Right arrow
+                case 68: // Left arrow
+                    $answer = !$answer;
+                    break;
+                case 32: // Space
+                case 10: // Enter key
+                    break 2;
+            }
+        }
+
+        $this->write('<restoreCursor><eraseToBottom>');
+        $this->exec('stty ' . $this->sttyMode);
+
+        $this->writeLn($answer ? $yes : $no, '<green><b> %s </>');
+
+        return $answer;
     }
 
     public function secret(string $question, mixed $default = ''): string
@@ -334,7 +387,7 @@ class Output
         $formats = [
             // reset
             '</>' => "\e[m",
-            '<br>' => "\n",
+            '<br>' => PHP_EOL,
 
             '<b>' => "\e[1m",
             '<f>' => "\e[2m",
@@ -373,10 +426,25 @@ class Output
             '<eraseToTop>' => "\e[1J",
         ];
 
+        $text = str_replace('<br>', '', $text);
+
         return str_replace(
             array_keys($formats),
             $this->ansi ? array_values($formats) : '',
             $text
         );
+    }
+
+    /**
+     * Remove bash color symbols from string
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function clearColor(string $str): string
+    {
+        $patterns = "/\e?\[[\d;]+m/";
+
+        return (string)preg_replace($patterns, '', $str);
     }
 }

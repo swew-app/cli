@@ -119,8 +119,7 @@ By inheriting from the class `Command` - we also get auxiliary methods defined i
 - `getHelpMessage(): string` - get help message for the command (can be overridden)
 - `isValid(): bool` - check if all required arguments are passed to the command correctly
 - `getErrorMessage():string` - Get an error message
-- `call(string $command, ?array $args:) int` - TODO: call another command
-- `callSilent(string $command, ?array $args): int` - TODO: call another command without outputting messages from it
+- `call(string $command, ?array $args:) int` - call another command
 
 # Working with command parameters, description of arguments
 
@@ -244,6 +243,14 @@ If you do not want to use formatting, specify this
 $this->output->setAnsi(false);
 ```
 
+## Clear bash colors
+
+Remove bash color symbols from string
+
+```php
+$this->output->clearColor($text); // no color string
+```
+
 ## Empty lines
 ```php
 // Write a single blank line...
@@ -262,11 +269,22 @@ $this->output->getLink($url, $text);
 ## ask
 ```php
 public function __invoke(): int {
-	$name = $this->output->ask('What is your name?'); 
+	$name = $this->output->ask('What is your name?');
 	// ...
 	return self::SUCCESS;
 }
 ```
+
+## askYesNo
+```php
+public function __invoke(): int {
+	$name = $this->output->askYesNo('Is this the best CLI utility?', true);
+	// ...
+	return self::SUCCESS;
+}
+```
+![askYesNo](assets/askYesNo.avif)
+
 
 ## secret
 ```php

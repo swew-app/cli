@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Swew\Cli;
 
+use Exception;
+use LogicException;
 use Swew\Cli\Command\CommandArgument;
 use Swew\Cli\Terminal\Output;
 
@@ -15,16 +17,15 @@ abstract class Command
     public const SUCCESS = 0;
     public const ERROR = 1;
 
+    protected mixed $commander = null;
+
     /** @var Output */
     protected ?Output $output = null;
 
     /** @var CommandArgument[] */
     private array $commandArguments = [];
 
-    public function __invoke(): int
-    {
-        return self::SUCCESS;
-    }
+    abstract public function __invoke(): int;
 
     public function init(): void
     {
@@ -41,6 +42,24 @@ abstract class Command
     final public function setCommandArguments(array $commandArguments): void
     {
         $this->commandArguments = $commandArguments;
+    }
+
+    final public function setCommanderContext(SwewCommander $swewCommander): void
+    {
+        $this->commander = $swewCommander;
+    }
+
+    final public function getErrorMessage(): string
+    {
+        foreach ($this->commandArguments as $value) {
+            /** @var CommandArgument $value */
+            if ($value->isValid() === false) {
+                $name = $this->getName();
+                $msg = $value->getErrorMessage();
+                return "Get error for command '<b>$name</>': $msg";
+            }
+        }
+        return '';
     }
 
     final public function isValid(): bool
@@ -66,33 +85,27 @@ abstract class Command
         return substr($str, 0, $spacePos);
     }
 
-    final public function getErrorMessage(): string
+    /**
+     * Method for displaying help message for the current command by template
+     *
+     *
+     *
+     *
+     * @param string $messageTemplate
+     * @param string $optionsTemplate
+     * @return string
+     */
+    public function getHelpMessage($messageTemplate = ''): string
     {
-        foreach ($this->commandArguments as $value) {
-            /** @var CommandArgument $value */
-            if ($value->isValid() === false) {
-                $name = $this->getName();
-                $msg = $value->getErrorMessage();
-                return "Get error for command '<b>$name</>': $msg";
-            }
+        if ($messageTemplate === '') {
+            $messageTemplate = "<yellow>Description:</>\n {desc}\n" .
+                "<yellow>Usage:</>\n {name} [options]\n{options}";
         }
-        return '';
-    }
 
-    public function getHelpMessage(): string
-    {
-        $result = [];
 
-        $result[] = '<yellow>Description:</>';
-        $result[] = ' ' . $this::DESCRIPTION;
-        $result[] = '';
-        $result[] = '<yellow>Usage:</>';
-        $result[] = ' ' . $this->getName() . " [options]";
-        $result[] = '';
-        $result[] = '<yellow>Options:</>';
+        $optionKeyMaxLengths = 0;
 
         $options = [];
-        $optionKeyMaxLengths = 0;
 
         foreach ($this->commandArguments as $arg) {
             /** @var CommandArgument $arg */
@@ -104,17 +117,33 @@ abstract class Command
             }
         }
 
+        $params = [];
+
         foreach ($options as $name => $desc) {
             if (strlen($desc) > 0) {
-                $str = ' <green>' . str_pad($name, $optionKeyMaxLengths + 2, ' ') . '</>' . $desc;
+                $params[] = ' <green>' . str_pad($name, $optionKeyMaxLengths + 2, ' ') . '</>' . $desc;
             } else {
-                $str = ' <green>' . $name . '</>';
+                $params[] = ' <green>' . $name . '</>';
             }
-
-            $result[] = $str;
         }
 
-        return implode("\n", $result);
+        $varsForTmp = [
+            '{desc}' => $this::DESCRIPTION,
+            '{name}' => $this->getName(),
+            '{options}' => implode("\n", $params),
+        ];
+
+        return str_replace(
+            array_keys($varsForTmp),
+            array_values($varsForTmp),
+            $messageTemplate
+        );
+    }
+
+    final public function argv(string $key): mixed
+    {
+        $arg = $this->arg($key);
+        return $arg ? $arg->getValue() : null;
     }
 
     final public function arg(string $name): CommandArgument
@@ -125,24 +154,29 @@ abstract class Command
             }
         }
 
-        throw new \LogicException("Can't find argument '$name'");
+        throw new LogicException("Can't find argument '$name'");
     }
 
-    final public function argv(string $key): mixed
+    /**
+     * @throws Exception
+     */
+    final public function call(string $commandName, array $args = []): void
     {
-        $arg = $this->arg($key);
-        return $arg ? $arg->getValue() : null;
-    }
-
-    final public function call(): void
-    {
-        // TODO
-        return;
+        $this->getCommander()->call($commandName);
     }
 
     final public function callSilent(): void
     {
         // TODO
         return;
+    }
+
+    final public function getCommander(): mixed
+    {
+        if ($this->commander instanceof SwewCommander) {
+            return $this->commander;
+        } else {
+            throw new LogicException('SwewCommander instance not transferred');
+        }
     }
 }

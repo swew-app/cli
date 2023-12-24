@@ -51,7 +51,7 @@ class CommandArgument
     public function isRequired(): bool
     {
         $str = current(explode(':', $this->declaration, 2));
-        return strpos($str, '=') === false;
+        return !str_contains($str, '=');
     }
 
     public function parseInput(array $args): void
@@ -74,14 +74,14 @@ class CommandArgument
             }
 
             // Check if the argument is a command (starts with -- or -)
-            if (strpos($arg, '-') === 0) {
+            if (str_starts_with($arg, '-')) {
                 $isFind = false;
 
                 // Remove the -- or - from the beginning of the command
                 $command = ltrim($arg, '-');
 
                 // Check if the command has a value (contains =)
-                if (strpos($command, '=') !== false) {
+                if (str_contains($command, '=')) {
                     // Split the command into the command name and value
                     $list = explode('=', $command, 2);
 
@@ -134,7 +134,7 @@ class CommandArgument
 
         $part = $this->getFirstPart();
 
-        if (strpos($part, '=') === false) {
+        if (!str_contains($part, '=')) {
             return $type->default();
         }
 
@@ -148,7 +148,7 @@ class CommandArgument
     {
         $part = $this->getFirstPart();
 
-        if (strpos($part, '=') === false) {
+        if (!str_contains($part, '=')) {
             return false;
         }
 
