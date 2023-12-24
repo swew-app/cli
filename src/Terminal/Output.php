@@ -426,7 +426,7 @@ class Output
             '<eraseToTop>' => "\e[1J",
         ];
 
-        $text = str_replace('<br>', '', $text);
+        $text = str_replace('<br>', PHP_EOL, $text);
 
         return str_replace(
             array_keys($formats),
