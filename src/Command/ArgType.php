@@ -31,7 +31,7 @@ enum ArgType
         return match ($this) {
             ArgType::Int => intval($val),
             ArgType::Str => strval($val),
-            ArgType::Bool => boolval($val),
+            ArgType::Bool => $val === 'false' ? false : boolval($val),
         };
     }
 }
