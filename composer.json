@@ -1,7 +1,6 @@
 {
     "name": "swew/cli",
-    "description": "A command-line interface program with formatting and text entry functions.",
-    "version": "1.0.0",
+    "description": "SWEW/CLI: A PHP package for streamlined command line interface (CLI) development, providing an intuitive API for creating custom commands, handling input/output, and executing command logic effortlessly. Simplify your CLI application development with rapid development.",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -9,14 +8,11 @@
         "command-line",
         "console",
         "formatting",
-        "group",
         "input",
         "output",
         "program",
         "prompt",
         "terminal",
-        "text",
-        "tool",
         "utility"
     ],
     "authors": [
@@ -57,15 +53,13 @@
         "php": ">=8.1"
     },
     "require-dev": {
-        "laravel/pint": "v1.6.0",
-        "phpstan/phpstan": "^1.10.1",
-        "psalm/phar": "^5.7.5",
-        "swew/dd": "^v1.0.0",
-        "swew/test": "^v1.0.9"
+        "laravel/pint": "1.9.0",
+        "phpstan/phpstan": "^1.10.26",
+        "psalm/phar": "^5.13.1",
+        "swew/dd": "^1.3.0"
     },
     "scripts": {
         "test": "t",
-        "serve": "php -S localhost:8080 -t public/",
         "static": "./vendor/psalm/phar/psalm.phar --no-cache",
         "stan": "vendor/bin/phpstan analyse src --level=5",
         "code-check": "./vendor/bin/pint",

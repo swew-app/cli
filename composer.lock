@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "10f9b8e0d55ae42bc2027b0cc33a0974",
+    "content-hash": "97b12870c2ed80ff4e8faf2a4f5eb6e0",
     "packages": [],
     "packages-dev": [
         {
             "name": "laravel/pint",
-            "version": "v1.6.0",
+            "version": "v1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/pint.git",
-                "reference": "e48e3fadd7863d6b7d03464f5c4f211a828b890f"
+                "reference": "eac5ec3d6b5c96543c682e309a10fdddc9f61d80"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/pint/zipball/e48e3fadd7863d6b7d03464f5c4f211a828b890f",
-                "reference": "e48e3fadd7863d6b7d03464f5c4f211a828b890f",
+                "url": "https://api.github.com/repos/laravel/pint/zipball/eac5ec3d6b5c96543c682e309a10fdddc9f61d80",
+                "reference": "eac5ec3d6b5c96543c682e309a10fdddc9f61d80",
                 "shasum": ""
             },
             "require": {
@@ -29,13 +29,13 @@
                 "php": "^8.1.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.14.4",
-                "illuminate/view": "^10.0.0",
-                "laravel-zero/framework": "^10.0.0",
+                "friendsofphp/php-cs-fixer": "^3.16.0",
+                "illuminate/view": "^10.5.1",
+                "laravel-zero/framework": "^10.0.2",
                 "mockery/mockery": "^1.5.1",
-                "nunomaduro/larastan": "^2.4.0",
+                "nunomaduro/larastan": "^2.5.1",
                 "nunomaduro/termwind": "^1.15.1",
-                "pestphp/pest": "^1.22.4"
+                "pestphp/pest": "^2.4.0"
             },
             "bin": [
                 "builds/pint"
@@ -71,20 +71,20 @@
                 "issues": "https://github.com/laravel/pint/issues",
                 "source": "https://github.com/laravel/pint"
             },
-            "time": "2023-02-21T15:44:57+00:00"
+            "time": "2023-04-18T14:50:44+00:00"
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.1",
+            "version": "1.10.26",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "1cd5fc530a8b68702f3733ad64294b2a39564198"
+                "reference": "5d660cbb7e1b89253a47147ae44044f49832351f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1cd5fc530a8b68702f3733ad64294b2a39564198",
-                "reference": "1cd5fc530a8b68702f3733ad64294b2a39564198",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/5d660cbb7e1b89253a47147ae44044f49832351f",
+                "reference": "5d660cbb7e1b89253a47147ae44044f49832351f",
                 "shasum": ""
             },
             "require": {
@@ -113,8 +113,11 @@
                 "static analysis"
             ],
             "support": {
+                "docs": "https://phpstan.org/user-guide/getting-started",
+                "forum": "https://github.com/phpstan/phpstan/discussions",
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/1.10.1"
+                "security": "https://github.com/phpstan/phpstan/security/policy",
+                "source": "https://github.com/phpstan/phpstan-src"
             },
             "funding": [
                 {
@@ -130,20 +133,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-21T21:57:23+00:00"
+            "time": "2023-07-19T12:44:37+00:00"
         },
         {
             "name": "psalm/phar",
-            "version": "5.7.5",
+            "version": "5.13.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/psalm/phar.git",
-                "reference": "3068432d968407f18fb8c509ae423a754967a3bd"
+                "reference": "2107e3e98b25b93cb366dc601d1190af102431a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/psalm/phar/zipball/3068432d968407f18fb8c509ae423a754967a3bd",
-                "reference": "3068432d968407f18fb8c509ae423a754967a3bd",
+                "url": "https://api.github.com/repos/psalm/phar/zipball/2107e3e98b25b93cb366dc601d1190af102431a5",
+                "reference": "2107e3e98b25b93cb366dc601d1190af102431a5",
                 "shasum": ""
             },
             "require": {
@@ -163,22 +166,22 @@
             "description": "Composer-based Psalm Phar",
             "support": {
                 "issues": "https://github.com/psalm/phar/issues",
-                "source": "https://github.com/psalm/phar/tree/5.7.5"
+                "source": "https://github.com/psalm/phar/tree/5.13.1"
             },
-            "time": "2023-02-21T16:18:05+00:00"
+            "time": "2023-06-27T17:20:37+00:00"
         },
         {
             "name": "swew/dd",
-            "version": "v1.0.0",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swew-app/dd.git",
-                "reference": "72bc152d022ec2d25f8d055eaefd538ea5b77d45"
+                "reference": "84190be93662296d35dbfb4843714f5deabf8f26"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swew-app/dd/zipball/72bc152d022ec2d25f8d055eaefd538ea5b77d45",
-                "reference": "72bc152d022ec2d25f8d055eaefd538ea5b77d45",
+                "url": "https://api.github.com/repos/swew-app/dd/zipball/84190be93662296d35dbfb4843714f5deabf8f26",
+                "reference": "84190be93662296d35dbfb4843714f5deabf8f26",
                 "shasum": ""
             },
             "type": "library",
@@ -200,72 +203,9 @@
             "description": "The simplest way to debug variables. As in Laravel.",
             "support": {
                 "issues": "https://github.com/swew-app/dd/issues",
-                "source": "https://github.com/swew-app/dd/tree/v1.0.0"
+                "source": "https://github.com/swew-app/dd/tree/v1.3.0"
             },
-            "time": "2022-08-02T14:43:39+00:00"
-        },
-        {
-            "name": "swew/test",
-            "version": "v1.0.9",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/swew-app/test.git",
-                "reference": "40b724a8818db80977fea9190748d17dcde955fe"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/swew-app/test/zipball/40b724a8818db80977fea9190748d17dcde955fe",
-                "reference": "40b724a8818db80977fea9190748d17dcde955fe",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.1"
-            },
-            "require-dev": {
-                "laravel/pint": "^0.2",
-                "phpstan/phpstan": "^1.8",
-                "swew/dd": "^1.0",
-                "vimeo/psalm": "^4.24"
-            },
-            "bin": [
-                "bin/t"
-            ],
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.x-dev"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/Functions.php"
-                ],
-                "psr-4": {
-                    "Swew\\Test\\": "src/"
-                },
-                "exclude-from-classmap": [
-                    "spec",
-                    "/Tests/",
-                    "/test/",
-                    "/tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "AVIL13",
-                    "email": "avil@swew.app"
-                }
-            ],
-            "description": "A test framework that is designed to fix the fatal flaw of other test frameworks.",
-            "support": {
-                "issues": "https://github.com/swew-app/test/issues",
-                "source": "https://github.com/swew-app/test/tree/v1.0.9"
-            },
-            "time": "2022-08-28T17:21:49+00:00"
+            "time": "2023-03-19T15:14:34+00:00"
         }
     ],
     "aliases": [],

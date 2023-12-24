@@ -36,7 +36,7 @@ function testFactory(array $args, ?array $commands = null): array
 // = = = = = = = = = = = = =
 
 it('SwewCommander :setCommands :getCommand', function () {
-    $args = ['send:mail', 'user@mail.com', '--count', '1', '-silent'];
+    $args = ['script.php', 'send:mail', 'user@mail.com', '--count', '1', '-silent'];
 
     [
         'SwewCommander' => $sc,
@@ -47,14 +47,19 @@ it('SwewCommander :setCommands :getCommand', function () {
 });
 
 it('SwewCommander :setCommands :getCommand - with error', function () {
-    $args = ['send:mail', 'user@mail.com', '--count', '1'];
+    $args = ['script.php', 'send:mail', 'user@mail.com', '--count', '1'];
 
-    expect(fn () => testFactory($args))->not()->toThrow("Get error for command 'send:mail': <b>-tax</> - is required");
+    [
+        'SwewCommander' => $sc,
+        'TestHelper' => $helper,
+    ] = testFactory($args);
+
+    expect($helper->getOutputContentAndClear())->toBe(" ERROR  Get error for command 'send:mail': -silent,-S - is required\n");
 });
 
 
 it('SwewCommander :isNeedHelp :showHelp - Commander', function () {
-    $args = ['-h'];
+    $args = ['script.php', '-h'];
 
     [
         'SwewCommander' => $sc,
@@ -71,7 +76,7 @@ MSG;
 });
 
 it('SwewCommander :isNeedHelp :showHelp - Command', function () {
-    $args = ['send:mail', '-h'];
+    $args = ['script.php', 'send:mail', '-h'];
 
     [
         'SwewCommander' => $sc,
