@@ -45,9 +45,17 @@ class SwewCommander
             return;
         }
 
-        /** @var Command */
-        $command = $this->getCommand($this->argList[0]);
+        $status = $this->call($this->argList[0]);
 
+        if ($this->stopByStatus) {
+            exit($status);
+        }
+    }
+
+    public function call(string $commandName, array $args = []): int
+    {
+        /** @var Command */
+        $command = $this->getCommand($commandName, $args);
 
         if ($command->isValid()) {
             $command->init();
@@ -58,9 +66,7 @@ class SwewCommander
             $this->output->error($errorMessage);
         }
 
-        if ($this->stopByStatus) {
-            exit($status);
-        }
+        return $status;
     }
 
     public function setHelpPrefix(string $helpPrefix): void
@@ -78,15 +84,26 @@ class SwewCommander
         }
     }
 
-    protected function getCommand(string $name): object
+    /**
+     * @param string $name Command NAME or Command class
+     * @param array $args
+     * @return mixed
+     */
+    protected function getCommand(string $name, array $args = []): object
     {
+        if (class_exists($name)) {
+            $name = $this->parseName($name);
+        }
+
+        $args = count($args) === 0 ? $this->argList : $args;
+
         if (isset($this->commandMap[$name])) {
             /** @var Command */
             $command = new $this->commandMap[$name]();
 
             $command->setOutput($this->output);
 
-            $this->fillCommandArguments($command, array_slice($this->argList, 1));
+            $this->fillCommandArguments($command, $args);
 
             return $command;
         }
@@ -94,6 +111,9 @@ class SwewCommander
         throw new \LogicException("Command '$name' not found");
     }
 
+    /**
+     * Fills arguments with "CommandArgument" values that can be worked with
+     */
     protected function fillCommandArguments(Command &$command, array $argsForCommand): void
     {
         /** @var string */
@@ -109,14 +129,11 @@ class SwewCommander
         }
 
         $command->setCommandArguments($commandArguments);
+        $command->setCommanderContext($this);
     }
 
     protected function isNeedHelp(): bool
     {
-        if (count($this->argList) === 0) {
-            return true;
-        }
-
         return in_array('-h', $this->argList)
             || in_array('-help', $this->argList)
             || in_array('--help', $this->argList)
@@ -155,12 +172,12 @@ class SwewCommander
 
         $result[] = '<yellow>Available commands:</>';
 
-        // проходим по списку комманд и собираем название и десприпшен
+        // проходим по списку команд и собираем название и десприпшен
         foreach ($this->commandMap as $commandClass) {
             $name = $this->parseName($commandClass);
             $description = $commandClass::DESCRIPTION;
 
-            $result[] = " <yellow>$name</>: $description";
+            $result[] = " <green>$name</>: $description";
         }
 
         return implode("\n", $result);
