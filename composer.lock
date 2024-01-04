@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "97b12870c2ed80ff4e8faf2a4f5eb6e0",
+    "content-hash": "5f528bec7e14417080904bc75c8357d8",
     "packages": [],
     "packages-dev": [
         {
@@ -75,16 +75,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.26",
+            "version": "1.10.50",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "5d660cbb7e1b89253a47147ae44044f49832351f"
+                "reference": "06a98513ac72c03e8366b5a0cb00750b487032e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/5d660cbb7e1b89253a47147ae44044f49832351f",
-                "reference": "5d660cbb7e1b89253a47147ae44044f49832351f",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/06a98513ac72c03e8366b5a0cb00750b487032e4",
+                "reference": "06a98513ac72c03e8366b5a0cb00750b487032e4",
                 "shasum": ""
             },
             "require": {
@@ -133,20 +133,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-07-19T12:44:37+00:00"
+            "time": "2023-12-13T10:59:42+00:00"
         },
         {
             "name": "psalm/phar",
-            "version": "5.13.1",
+            "version": "5.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/psalm/phar.git",
-                "reference": "2107e3e98b25b93cb366dc601d1190af102431a5"
+                "reference": "a78b5c2e8860c3b4242c63bc0864621278705f9a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/psalm/phar/zipball/2107e3e98b25b93cb366dc601d1190af102431a5",
-                "reference": "2107e3e98b25b93cb366dc601d1190af102431a5",
+                "url": "https://api.github.com/repos/psalm/phar/zipball/a78b5c2e8860c3b4242c63bc0864621278705f9a",
+                "reference": "a78b5c2e8860c3b4242c63bc0864621278705f9a",
                 "shasum": ""
             },
             "require": {
@@ -166,22 +166,22 @@
             "description": "Composer-based Psalm Phar",
             "support": {
                 "issues": "https://github.com/psalm/phar/issues",
-                "source": "https://github.com/psalm/phar/tree/5.13.1"
+                "source": "https://github.com/psalm/phar/tree/5.18.0"
             },
-            "time": "2023-06-27T17:20:37+00:00"
+            "time": "2023-12-16T09:41:14+00:00"
         },
         {
             "name": "swew/dd",
-            "version": "v1.3.0",
+            "version": "v1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swew-app/dd.git",
-                "reference": "84190be93662296d35dbfb4843714f5deabf8f26"
+                "reference": "184e62b6dcb302531bdd192e253fc692b60ef9f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swew-app/dd/zipball/84190be93662296d35dbfb4843714f5deabf8f26",
-                "reference": "84190be93662296d35dbfb4843714f5deabf8f26",
+                "url": "https://api.github.com/repos/swew-app/dd/zipball/184e62b6dcb302531bdd192e253fc692b60ef9f2",
+                "reference": "184e62b6dcb302531bdd192e253fc692b60ef9f2",
                 "shasum": ""
             },
             "type": "library",
@@ -203,9 +203,67 @@
             "description": "The simplest way to debug variables. As in Laravel.",
             "support": {
                 "issues": "https://github.com/swew-app/dd/issues",
-                "source": "https://github.com/swew-app/dd/tree/v1.3.0"
+                "source": "https://github.com/swew-app/dd/tree/v1.3.1"
             },
-            "time": "2023-03-19T15:14:34+00:00"
+            "time": "2023-07-30T13:55:18+00:00"
+        },
+        {
+            "name": "swew/test.phar",
+            "version": "v1.5.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/swew-app/test.phar.git",
+                "reference": "d9cefd025a5f09a6fa9afcd7dca7a00df176b990"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/swew-app/test.phar/zipball/d9cefd025a5f09a6fa9afcd7dca7a00df176b990",
+                "reference": "d9cefd025a5f09a6fa9afcd7dca7a00df176b990",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=8.1"
+            },
+            "conflict": {
+                "swew/test": "*"
+            },
+            "bin": [
+                "t",
+                "swew-test.phar"
+            ],
+            "type": "library",
+            "autoload": {
+                "exclude-from-classmap": [
+                    "spec",
+                    "/Tests/",
+                    "/test/",
+                    "/tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "AVIL13",
+                    "email": "avil@swew.app"
+                }
+            ],
+            "description": "A test framework that is designed to fix the fatal flaw of other test frameworks.",
+            "keywords": [
+                "TDD",
+                "fast",
+                "informative interface",
+                "lightweight",
+                "testing"
+            ],
+            "support": {
+                "issues": "https://github.com/swew-app/test.phar/issues",
+                "source": "https://github.com/swew-app/test.phar/tree/v1.5.10"
+            },
+            "time": "2024-01-04T19:46:00+00:00"
         }
     ],
     "aliases": [],
@@ -217,8 +275,5 @@
         "php": ">=8.1"
     },
     "platform-dev": [],
-    "platform-overrides": {
-        "php": "8.1"
-    },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
