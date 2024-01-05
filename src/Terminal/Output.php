@@ -165,13 +165,15 @@ class Output
             return $answer;
         }
 
-        $this->write('<saveCursor><eraseToBottom>');
-
         // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
         $this->exec('stty -icanon -echo');
 
+        $isShowed = false;
+
         while (true) {
-            $this->write('<restoreCursor><eraseToBottom>');
+            if ($isShowed) {
+                $this->write('<up_2><eraseToBottom>');
+            }
 
             $this->writeLn($question, '  <cyan>%s</>');
 
@@ -182,29 +184,27 @@ class Output
             }
             $this->writeLn($line);
 
+            $isShowed = true;
+
             // Wait for user input
-            $key = ord(fread($this->input, 1));
-
-            $this->write('<restoreCursor>');
-
-
+            $key = $this->readKeyPress();
 
             // Move the selection up or down based on user input
             switch ($key) {
-                case 65: // Up arrow
-                case 66: // Down arrow
-                case 67: // Right arrow
-                case 68: // Left arrow
+                case 'UP': // Up arrow
+                case 'DOWN': // Down arrow
+                case 'RIGHT': // Right arrow
+                case 'LEFT': // Left arrow
                     $answer = !$answer;
                     break;
-                case 32: // Space
-                case 10: // Enter key
+                case 'SPACE': // Space
+                case 'ENTER': // Enter key
                     break 2;
             }
         }
 
-        $this->write('<restoreCursor><eraseToBottom>');
         $this->exec('stty ' . $this->sttyMode);
+        $this->write('<up_2><eraseToBottom>');
 
         $this->write($answer ? '<green>✓</>' : '<red>✘</>');
         $this->writeLn($question, ' <cyan>%s</>');
@@ -256,16 +256,19 @@ class Output
         }
 
         $this->writeLn($text, '<cyan>%s</>');
+        $this->write('<eraseToBottom>');
 
-        $this->write('<saveCursor><eraseToBottom>');
 
         // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
         $this->exec('stty -icanon -echo');
 
         $cursorIndex = 0;
+        $numberOfLinesDrawnLAST = 0;
 
         while (true) {
-            $this->write('<restoreCursor><eraseToBottom>');
+            if ($numberOfLinesDrawnLAST) {
+                $this->write("<up_$numberOfLinesDrawnLAST><eraseToBottom>");
+            }
 
             $n = 7; // Count of showed options
             $i = max(0, $cursorIndex - 3);
@@ -292,18 +295,20 @@ class Output
                 $numberOfLinesDrawn++;
             }
 
+            $numberOfLinesDrawnLAST = $numberOfLinesDrawn;
+
             // Wait for user input
-            $key = ord(fread($this->input, 1));
+            $key = $this->readKeyPress();
 
             // Move the selection up or down based on user input
             switch ($key) {
-                case 65: // Up arrow
+                case 'UP': // Up arrow
                     $cursorIndex = max(0, $cursorIndex - 1);
                     break;
-                case 66: // Down arrow
+                case 'DOWN': // Down arrow
                     $cursorIndex = min(count($options) - 1, $cursorIndex + 1);
                     break;
-                case 32: // Space
+                case 'SPACE': // Space
                     if (isset($selected[$cursorIndex])) {
                         unset($selected[$cursorIndex]);
                     } else {
@@ -314,7 +319,7 @@ class Output
                         }
                     }
                     break;
-                case 10: // Enter key
+                case 'ENTER': // Enter key
                     if (!$isMultiple) {
                         $selected[$cursorIndex] = true;
                         break 2;
@@ -326,7 +331,10 @@ class Output
             }
         }
 
-        $this->write('<restoreCursor><eraseToBottom>');
+        if ($numberOfLinesDrawnLAST) {
+            $numberOfLinesDrawnLAST+=1;
+            $this->write("<up_$numberOfLinesDrawnLAST><eraseToBottom>");
+        }
 
         $this->exec('stty ' . $this->sttyMode);
 
@@ -379,8 +387,43 @@ class Output
         return 1 !== $status;
     }
 
+    private function readKeyPress(): ?string
+    {
+        // Читаем 3 или 4 байта для escape-последовательности стрелок
+        $key = fread($this->input, 4);
+
+        $k0 = ord($key[0]);
+
+        if ($k0 === 32) {
+            return 'SPACE';
+        }
+        if ($k0 === 10) {
+            return 'ENTER';
+        }
+
+        $k1 = ord($key[1]);
+        $k2 = ord($key[2]);
+
+        if ($k0 !== 27 || $k1 !== 91) {
+            return null; // Не escape-последовательность
+        }
+
+        switch ($k2) {
+            case 65: return 'UP';
+            case 66: return 'DOWN';
+            case 67: return 'RIGHT';
+            case 68: return 'LEFT';
+            case 32: return 'SPACE';
+            case 10: return 'ENTER';
+        }
+
+        return null;
+    }
+
     public function format(string $text): string
     {
+        $isTerm = getenv('TERM_PROGRAM') === 'Apple_Terminal';
+
         $formats = [
             // reset
             '</>' => "\e[m",
@@ -414,14 +457,28 @@ class Output
             '<bgPurple>' => "\e[48;5;13m",
             '<bgCyan>' => "\e[48;5;6m",
 
-            '<saveCursor>' => "\e[s",
-            '<restoreCursor>' => "\e[u",
+            '<saveCursor>' => $isTerm ? "\e[8n" : "\e[s",
+            '<restoreCursor>' => $isTerm ? "\e[7n" : "\e[u",
             '<eraseToEndLine>' => "\e[K",
             '<eraseToStartLine>' => "\e[1K",
             '<eraseLine>' => "\e[2K",
             '<eraseToBottom>' => "\e[J",
+            '<down>' => "\eJ",
             '<eraseToTop>' => "\e[1J",
-            '<up_5>' => "\e[5A"
+            '<up>' => "\e[1J",
+            '<screen>' => "\e[2J",
+            '<show>' => "\e?25h",
+            '<hide>' => "\e?25l",
+            '<getPosition>' => "\e6n",
+            '<up_1>' => "\e[1A",
+            '<up_2>' => "\e[2A",
+            '<up_3>' => "\e[3A",
+            '<up_4>' => "\e[4A",
+            '<up_5>' => "\e[5A",
+            '<up_6>' => "\e[6A",
+            '<up_7>' => "\e[7A",
+            '<up_8>' => "\e[8A",
+            '<up_9>' => "\e[9A",
         ];
 
         $text = str_replace('<br>', PHP_EOL, $text);
