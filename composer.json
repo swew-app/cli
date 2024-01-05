@@ -51,10 +51,10 @@
     },
     "require-dev": {
         "laravel/pint": "1.9.0",
-        "phpstan/phpstan": "^1.10.52",
+        "phpstan/phpstan": "^1.10.53",
         "psalm/phar": "^5.18.0",
         "swew/dd": "^1.3.1",
-        "swew/test.phar": "^1.5.12"
+        "swew/test.phar": "^1.5.13"
     },
     "scripts": {
         "test": "t",

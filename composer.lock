@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1128f824e98577ce139c5aec0d27c7a0",
+    "content-hash": "9b357067a573f2490b54b45822b21c66",
     "packages": [],
     "packages-dev": [
         {
@@ -75,16 +75,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.52",
+            "version": "1.10.53",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "0cd0c330081d4f1e1d630701fe4f342c3b659685"
+                "reference": "0c48595cce15f67d6a7faf30e9d13c775e6e9875"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/0cd0c330081d4f1e1d630701fe4f342c3b659685",
-                "reference": "0cd0c330081d4f1e1d630701fe4f342c3b659685",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/0c48595cce15f67d6a7faf30e9d13c775e6e9875",
+                "reference": "0c48595cce15f67d6a7faf30e9d13c775e6e9875",
                 "shasum": ""
             },
             "require": {
@@ -133,7 +133,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-01-05T09:51:32+00:00"
+            "time": "2024-01-05T13:55:38+00:00"
         },
         {
             "name": "psalm/phar",
@@ -209,16 +209,16 @@
         },
         {
             "name": "swew/test.phar",
-            "version": "v1.5.12",
+            "version": "v1.5.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swew-app/test.phar.git",
-                "reference": "025c7a70e64666367ec4fc7a22656355e8dff03d"
+                "reference": "65dcd7ea4892e92cf4eedfb17f768357eceb42be"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swew-app/test.phar/zipball/025c7a70e64666367ec4fc7a22656355e8dff03d",
-                "reference": "025c7a70e64666367ec4fc7a22656355e8dff03d",
+                "url": "https://api.github.com/repos/swew-app/test.phar/zipball/65dcd7ea4892e92cf4eedfb17f768357eceb42be",
+                "reference": "65dcd7ea4892e92cf4eedfb17f768357eceb42be",
                 "shasum": ""
             },
             "require": {
@@ -261,9 +261,9 @@
             ],
             "support": {
                 "issues": "https://github.com/swew-app/test.phar/issues",
-                "source": "https://github.com/swew-app/test.phar/tree/v1.5.12"
+                "source": "https://github.com/swew-app/test.phar/tree/v1.5.13"
             },
-            "time": "2024-01-05T08:06:53+00:00"
+            "time": "2024-01-05T14:35:15+00:00"
         }
     ],
     "aliases": [],
