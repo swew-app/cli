@@ -92,23 +92,21 @@ abstract class Command
      *
      *
      * @param string $messageTemplate
-     * @param string $optionsTemplate
      * @return string
      */
-    public function getHelpMessage($messageTemplate = ''): string
+    public function getHelpMessage(string $messageTemplate = ''): string
     {
         if ($messageTemplate === '') {
-            $messageTemplate = "<yellow>Description:</>\n {desc}\n" .
-                "<yellow>Usage:</>\n {name} [options]\n{options}";
+            $messageTemplate = "<yellow>Description:</>\n {desc}\n\n" .
+                "<yellow>Usage:</>\n {name} [options]\n\n" .
+                "Options:\n{options}";
         }
-
 
         $optionKeyMaxLengths = 0;
 
         $options = [];
 
         foreach ($this->commandArguments as $arg) {
-            /** @var CommandArgument $arg */
             $name = $arg->getNames();
             $options[$name] = $arg->getDescription();
 

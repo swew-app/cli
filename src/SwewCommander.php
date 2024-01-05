@@ -54,7 +54,7 @@ class SwewCommander
 
     public function call(string $commandName, array $args = []): int
     {
-        /** @var Command */
+        /** @var Command $command */
         $command = $this->getCommand($commandName, $args);
 
         if ($command->isValid()) {
@@ -102,6 +102,10 @@ class SwewCommander
             $command = new $this->commandMap[$name]();
 
             $command->setOutput($this->output);
+
+            if ($args[0] === $name) {
+                array_shift($args);
+            }
 
             $this->fillCommandArguments($command, $args);
 

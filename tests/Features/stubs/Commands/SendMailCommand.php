@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-namespace TestSwew\Commands;
-
 use Swew\Cli\Command;
 
 class SendMailCommand extends Command

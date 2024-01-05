@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
-require_once('stubs/Commands/SendMailCommand.php');
+require_once __DIR__ . DIRECTORY_SEPARATOR . '../../vendor/autoload.php';
+require_once 'stubs/Commands/SendMailCommand.php';
 
 use Swew\Cli\SwewCommander;
 use Swew\Cli\Testing\TestHelper;
-use TestSwew\Commands\SendMailCommand;
 
 class TestSwewCommander extends SwewCommander
 {
+    protected array $commands = [
+        \SendMailCommand::class
+    ];
+
     public function __call(string $name, array $args): mixed
     {
         return $this->$name(...$args);
@@ -20,10 +24,6 @@ function testFactory(array $args, ?array $commands = null): array
 {
     $helper = new TestHelper();
     $sc = new TestSwewCommander($args, $helper->getOutput(), false);
-
-    $sc->setCommands($commands ?? [
-        SendMailCommand::class,
-    ]);
 
     $sc->run();
 
