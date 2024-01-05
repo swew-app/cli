@@ -15,17 +15,19 @@ $arg = new CommandArgument('send:mail {mail} {-name=} {-id=}');
 $output = new Output();
 $output->writeLn("\n\n");
 
-$bar = $output->createProgressBar(5);
 
+/*
+$bar = $output->createProgressBar(5);
 $bar->start(); // show progress bar
 
-foreach ([1,2,3,4,5] as $user) {
+foreach ([1,2] as $user) {
     sleep(1);
-	$bar->increment(); // progress
+    $bar->increment(); // progress
 }
 
 $bar->finish(); // remove progressbar
 $output->writeLn("\n\n");
+//*/
 
 
 // $link = $output->getLink('https://swew.app', 'SWEW Site');
@@ -41,6 +43,7 @@ for ($i = 0; $i <= 255; $i++) {
     $title = str_pad("  $i", 7, ' ');
     $output->write($i, "\e[48;5;${i}m${title}</> ");
 }
+$output->writeLn("\n");
 // */
 
 $list = [
@@ -58,6 +61,8 @@ $list = [
     'Web',
     'Samurai',
 ];
+
+// $answer = $output->askYesNo('is a good day?', true);
 
 // $answer = $output->select('Select value', $list);
 // $answer = $output->choice('Select value', $list);
@@ -84,10 +89,10 @@ $answer = $output->ask('How are you?');
 $output->writeLn($answer, '<red>%s</>');
 // */
 
-/*
+// /*
 $output->table(
-['Name', 'Age', 'Weapon'],
-[
+    ['Name', 'Age', 'Weapon'],
+    [
 ['Leo', 22, 'Swords'],
 ['Mike', 21.6, 'Nunchaks'],
 ['Don', 21.9, 'Bo'],

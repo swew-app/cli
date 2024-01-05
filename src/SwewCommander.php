@@ -87,9 +87,9 @@ class SwewCommander
     /**
      * @param string $name Command NAME or Command class
      * @param array $args
-     * @return mixed
+     * @return Command
      */
-    protected function getCommand(string $name, array $args = []): object
+    protected function getCommand(string $name, array $args = []): Command
     {
         if (class_exists($name)) {
             $name = $this->parseName($name);
@@ -98,7 +98,7 @@ class SwewCommander
         $args = count($args) === 0 ? $this->argList : $args;
 
         if (isset($this->commandMap[$name])) {
-            /** @var Command */
+            /** @var Command $command */
             $command = new $this->commandMap[$name]();
 
             $command->setOutput($this->output);

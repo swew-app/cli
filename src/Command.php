@@ -76,8 +76,9 @@ abstract class Command
 
     final public function getName(): string
     {
+        /** @var string $str */
         $str = $this::NAME;
-        $str = str_replace("\n", '', $str);
+        $str = str_replace("\n", ' ', $str);
         $spacePos = strpos($str, ' ');
         if ($spacePos === false) {
             return $str;
@@ -141,7 +142,7 @@ abstract class Command
     final public function argv(string $key): mixed
     {
         $arg = $this->arg($key);
-        return $arg ? $arg->getValue() : null;
+        return $arg->getValue();
     }
 
     final public function arg(string $name): CommandArgument

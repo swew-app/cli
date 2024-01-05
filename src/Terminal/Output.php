@@ -110,31 +110,24 @@ class Output
         $columnWidths = [];
         foreach ($data as $row) {
             foreach ($row as $columnIndex => $value) {
-                $columnWidths[$columnIndex] = max(strlen(strval($value)), $columnWidths[$columnIndex] ?? 0);
+                $columnWidths[$columnIndex] = max(strlen(strval($value)) + 1, $columnWidths[$columnIndex] ?? 0);
             }
         }
 
         // Output the table header
         $line = '';
         foreach ($data[0] as $columnIndex => $value) {
-            $line .= sprintf("%-{$columnWidths[$columnIndex]}s  ", $value);
+            $line .= sprintf("%-{$columnWidths[$columnIndex]}s ", " $value");
         }
-        $this->writeLn($line, '<blue>%s</>');
-
-        // Output the table separator
-        $line = '';
-        foreach ($columnWidths as $width) {
-            $line .= sprintf("%'-{$width}s  ", '');
-        }
-        $this->writeLn($line, '<blue>%s</>');
+        $this->writeLn($line, '<bgBlue><b><i>%s</>');
 
         // Output the table rows
         for ($i = 1; $i < count($data); $i++) {
             $line = '';
             foreach ($data[$i] as $columnIndex => $value) {
-                $line .= sprintf("%-{$columnWidths[$columnIndex]}s  ", $value);
+                $line .= sprintf("%-{$columnWidths[$columnIndex]}s ", " $value");
             }
-            $format = $i % 2 === 0 ? '<gray>%s</>' : '<white>%s</>';
+            $format = $i % 2 === 0 ? '<blue>%s</>' : '<white>%s</>';
             $this->writeLn($line, $format);
         }
     }
@@ -172,8 +165,6 @@ class Output
             return $answer;
         }
 
-        $this->writeLn($question, ' <cyan>%s</>');
-
         $this->write('<saveCursor><eraseToBottom>');
 
         // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
@@ -181,6 +172,9 @@ class Output
 
         while (true) {
             $this->write('<restoreCursor><eraseToBottom>');
+
+            $this->writeLn($question, '  <cyan>%s</>');
+
             if ($answer) {
                 $line = "  <green><u><b>$yes</>  <gray>$no</>";
             } else {
@@ -192,6 +186,8 @@ class Output
             $key = ord(fread($this->input, 1));
 
             $this->write('<restoreCursor>');
+
+
 
             // Move the selection up or down based on user input
             switch ($key) {
@@ -210,7 +206,8 @@ class Output
         $this->write('<restoreCursor><eraseToBottom>');
         $this->exec('stty ' . $this->sttyMode);
 
-        $this->writeLn($answer ? $yes : $no, '<green><b> %s </>');
+        $this->write($answer ? '<green>✓</>' : '<red>✘</>');
+        $this->writeLn($question, ' <cyan>%s</>');
 
         return $answer;
     }
@@ -397,24 +394,24 @@ class Output
             '<hidden>' => "\e[8m",
             '<s>' => "\e[9m",
 
-            '<black>' => "\e[38;5;0m",
+            '<black>' => "\e[38;5;16m",
             '<gray>' => "\e[38;5;8m",
             '<white>' => "\e[38;5;7m",
             '<red>' => "\e[38;5;1m",
             '<green>' => "\e[38;5;2m",
             '<yellow>' => "\e[38;5;3m",
-            '<blue>' => "\e[38;5;4m",
-            '<purple>' => "\e[38;5;5m",
+            '<blue>' => "\e[38;5;24m",
+            '<purple>' => "\e[38;5;13m",
             '<cyan>' => "\e[38;5;6m",
 
-            '<bgBlack>' => "\e[48;5;0m",
+            '<bgBlack>' => "\e[48;5;16m",
             '<bgGray>' => "\e[48;5;8m",
             '<bgWhite>' => "\e[48;5;7m",
             '<bgRed>' => "\e[48;5;1m",
             '<bgGreen>' => "\e[48;5;2m",
             '<bgYellow>' => "\e[48;5;3m",
-            '<bgBlue>' => "\e[48;5;4m",
-            '<bgPurple>' => "\e[48;5;5m",
+            '<bgBlue>' => "\e[48;5;24m",
+            '<bgPurple>' => "\e[48;5;13m",
             '<bgCyan>' => "\e[48;5;6m",
 
             '<saveCursor>' => "\e[s",
@@ -424,6 +421,7 @@ class Output
             '<eraseLine>' => "\e[2K",
             '<eraseToBottom>' => "\e[J",
             '<eraseToTop>' => "\e[1J",
+            '<up_5>' => "\e[5A"
         ];
 
         $text = str_replace('<br>', PHP_EOL, $text);
