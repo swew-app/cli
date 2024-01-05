@@ -103,7 +103,7 @@ class SwewCommander
 
             $command->setOutput($this->output);
 
-            if ($args[0] === $name) {
+            if (isset($args[0]) && $args[0] === $name) {
                 array_shift($args);
             }
 
