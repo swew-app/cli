@@ -166,6 +166,7 @@ class CommandArgument
             if (isset($matches[1])) {
                 $this->currentType = match ($matches[1]) {
                     'int' => ArgType::Int,
+                    'float' => ArgType::Float,
                     'str' => ArgType::Str,
                     'bool' => ArgType::Bool,
                     default => throw new \RuntimeException("Wrong type of cli argument: $part"),

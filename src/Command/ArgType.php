@@ -7,6 +7,7 @@ namespace Swew\Cli\Command;
 enum ArgType
 {
     case Int;
+    case Float;
     case Str;
     case Bool;
 
@@ -14,6 +15,7 @@ enum ArgType
     {
         return match ($this) {
             ArgType::Int => 0,
+            ArgType::Float => 0.0,
             ArgType::Str => '',
             ArgType::Bool => false,
         };
@@ -30,6 +32,7 @@ enum ArgType
 
         return match ($this) {
             ArgType::Int => intval($val),
+            ArgType::Float => floatval($val),
             ArgType::Str => strval($val),
             ArgType::Bool => $val === 'false' ? false : boolval($val),
         };
