@@ -193,7 +193,7 @@ class CommandArgument
         $name = $this->names[0];
 
         if ($this->isArgument()) {
-            $name = "-${name}";
+            $name = "-{$name}";
         }
 
         return '<b>' . $this->getNames() . '</> - is required';
