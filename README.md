@@ -141,6 +141,9 @@ const NAME = 'send:email {--userId=[]}';
 // Argument with typing
 const NAME = 'send:email {--userId (int)}';
 
+// Argument with typing
+const NAME = 'send:email {--userId (float)}';
+
 // Argument with typing, default userId === 0
 const NAME = 'send:email {--userId= (int)}';
 
