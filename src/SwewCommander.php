@@ -120,7 +120,6 @@ class SwewCommander
      */
     protected function fillCommandArguments(Command &$command, array $argsForCommand): void
     {
-        /** @var string */
         $name = $command::NAME;
         preg_match_all('/{([^}]+)}/', $name, $matches);
 
