@@ -169,6 +169,15 @@ it('CommandArgument parseInput 1.2', function () {
     expect($arg->getValue())->toBe('123');
 });
 
+it('CommandArgument parseInput 1.3', function () {
+    $str = '--id (float)';
+    $arg = new CommandArgument($str);
+
+    $arg->parseInput(['some text', '--id', '1.23', '-c=2']);
+
+    expect($arg->getValue())->toBe(1.23);
+});
+
 it('CommandArgument parseInput 2.1', function () {
     $str = 'id=[]';
     $arg = new CommandArgument($str);
