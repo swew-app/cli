@@ -40,7 +40,7 @@ class ShowTimeCommand extends Command {
     {
         $prefix = $this->arg('prefix')->getValue();
 
-        $time = $prefix . ' ' . date();
+        $time = $prefix . ' ' . date('H:i:s');
 
         $this->output->writeLn($time);
 
