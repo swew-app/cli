@@ -31,8 +31,6 @@ class SwewCommander
 
     /**
      * Method called when creating
-     *
-     * @return void
      */
     protected function init(): void
     {
@@ -42,6 +40,7 @@ class SwewCommander
     {
         if ($this->isNeedHelp() || count($this->argList) === 0) {
             $this->showHelp();
+
             return;
         }
 
@@ -85,9 +84,7 @@ class SwewCommander
     }
 
     /**
-     * @param string $name Command NAME or Command class
-     * @param array $args
-     * @return Command
+     * @param  string  $name Command NAME or Command class
      */
     protected function getCommand(string $name, array $args = []): Command
     {
@@ -102,6 +99,7 @@ class SwewCommander
             $command = new $this->commandMap[$name]();
 
             $command->setOutput($this->output);
+            $command->setArgs($this->argList);
 
             if (isset($args[0]) && $args[0] === $name) {
                 array_shift($args);
@@ -189,7 +187,7 @@ class SwewCommander
     private function parseName(string $str): string
     {
         if (class_exists($str)) {
-            $str = constant($str . '::NAME');
+            $str = constant($str.'::NAME');
         }
 
         $str = str_replace("\n", '', $str);
@@ -197,6 +195,7 @@ class SwewCommander
         if ($spacePos === false) {
             return $str;
         }
+
         return substr($str, 0, $spacePos);
     }
 }

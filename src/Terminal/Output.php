@@ -7,6 +7,7 @@ namespace Swew\Cli\Terminal;
 class Output
 {
     private $input;
+
     private $output;
 
     private bool $ansi = true;
@@ -21,7 +22,7 @@ class Output
         $input = $stdin ?? fopen('php://stdin', 'r');
         $output = $stdout ?? fopen('php://output', 'r');
 
-        if (!is_resource($output) || !is_resource($input)) {
+        if (! is_resource($output) || ! is_resource($input)) {
             throw new \Exception("Wrong type for \$output:($output) or \$input:($input) stream");
         }
 
@@ -41,7 +42,7 @@ class Output
             fclose($this->output);
         }
         if ($this->sttyMode) {
-            $this->exec('stty ' . $this->sttyMode);
+            $this->exec('stty '.$this->sttyMode);
         }
     }
 
@@ -59,7 +60,6 @@ class Output
         return "\e]8;;$url\a$text\e]8;;\a";
     }
 
-
     public function write(string|int|float $text, string $format = '%s'): void
     {
         $text = sprintf($format, $text);
@@ -71,7 +71,7 @@ class Output
 
     public function writeLn(string|int|float $text, string $format = '%s'): void
     {
-        $this->write($text, $format . "\n");
+        $this->write($text, $format."\n");
     }
 
     public function info(mixed $text): void
@@ -140,6 +140,7 @@ class Output
     public function setAnsi(bool $ansi): self
     {
         $this->ansi = $ansi;
+
         return $this;
     }
 
@@ -147,12 +148,12 @@ class Output
     {
         $isInteractive = $this->isInteractiveInput($this->input);
 
-        if (!$isInteractive) {
+        if (! $isInteractive) {
             return $default;
         }
 
         $this->writeLn($question);
-        $this->write("<cyan>❯</> ");
+        $this->write('<cyan>❯</> ');
 
         return trim(strval(fgets($this->input)));
     }
@@ -161,7 +162,7 @@ class Output
     {
         $isInteractive = $this->isInteractiveInput($this->input);
 
-        if (!$isInteractive) {
+        if (! $isInteractive) {
             return $answer;
         }
 
@@ -195,7 +196,7 @@ class Output
                 case 'DOWN': // Down arrow
                 case 'RIGHT': // Right arrow
                 case 'LEFT': // Left arrow
-                    $answer = !$answer;
+                    $answer = ! $answer;
                     break;
                 case 'SPACE': // Space
                 case 'ENTER': // Enter key
@@ -203,7 +204,7 @@ class Output
             }
         }
 
-        $this->exec('stty ' . $this->sttyMode);
+        $this->exec('stty '.$this->sttyMode);
         $this->write('<up_2><eraseToBottom>');
 
         $this->write($answer ? '<green>✓</>' : '<red>✘</>');
@@ -216,12 +217,12 @@ class Output
     {
         $isInteractive = $this->isInteractiveInput($this->input);
 
-        if (!$isInteractive) {
+        if (! $isInteractive) {
             return $default;
         }
 
         $this->writeLn($question);
-        $this->write("<yellow>❯</> ");
+        $this->write('<yellow>❯</> ');
 
         $this->exec('stty -echo');
         $answer = trim(strval(fgets($this->input)));
@@ -247,7 +248,7 @@ class Output
         $isInteractive = $this->isInteractiveInput($this->input);
         $selected = array_fill_keys($selectedIndex, true);
 
-        if (!$isInteractive) {
+        if (! $isInteractive) {
             return array_filter(
                 $options,
                 fn (int $index) => isset($selected[$index]),
@@ -257,7 +258,6 @@ class Output
 
         $this->writeLn($text, '<cyan>%s</>');
         $this->write('<eraseToBottom>');
-
 
         // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
         $this->exec('stty -icanon -echo');
@@ -314,13 +314,13 @@ class Output
                     } else {
                         $selected[$cursorIndex] = true;
 
-                        if (!$isMultiple) {
+                        if (! $isMultiple) {
                             break 2;
                         }
                     }
                     break;
                 case 'ENTER': // Enter key
-                    if (!$isMultiple) {
+                    if (! $isMultiple) {
                         $selected[$cursorIndex] = true;
                         break 2;
                     }
@@ -332,11 +332,11 @@ class Output
         }
 
         if ($numberOfLinesDrawnLAST) {
-            $numberOfLinesDrawnLAST+=1;
+            $numberOfLinesDrawnLAST += 1;
             $this->write("<up_$numberOfLinesDrawnLAST><eraseToBottom>");
         }
 
-        $this->exec('stty ' . $this->sttyMode);
+        $this->exec('stty '.$this->sttyMode);
 
         return array_filter(
             $options,
@@ -378,7 +378,7 @@ class Output
             return @posix_isatty(fopen('php://stdin', 'r'));
         }
 
-        if (!\function_exists('exec')) {
+        if (! \function_exists('exec')) {
             return true;
         }
 
@@ -492,14 +492,11 @@ class Output
 
     /**
      * Remove bash color symbols from string
-     *
-     * @param string $str
-     * @return string
      */
     public static function clearColor(string $str): string
     {
         $patterns = "/\e?\[[\d;]+m/";
 
-        return (string)preg_replace($patterns, '', $str);
+        return (string) preg_replace($patterns, '', $str);
     }
 }

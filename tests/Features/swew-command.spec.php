@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . DIRECTORY_SEPARATOR . '../../vendor/autoload.php';
+require_once __DIR__.DIRECTORY_SEPARATOR.'../../vendor/autoload.php';
 require_once 'stubs/Commands/SendMailCommand.php';
 
 use Swew\Cli\SwewCommander;
@@ -11,7 +11,7 @@ use Swew\Cli\Testing\TestHelper;
 class TestSwewCommander extends SwewCommander
 {
     protected array $commands = [
-        \SendMailCommand::class
+        \SendMailCommand::class,
     ];
 
     public function __call(string $name, array $args): mixed
@@ -20,7 +20,7 @@ class TestSwewCommander extends SwewCommander
     }
 }
 
-function testFactory(array $args, ?array $commands = null): array
+function testFactory(array $args): array
 {
     $helper = new TestHelper();
     $sc = new TestSwewCommander($args, $helper->getOutput(), false);
@@ -57,7 +57,6 @@ it('SwewCommander :setCommands :getCommand - with error', function () {
     expect($helper->getOutputContentAndClear())->toBe(" ERROR  Get error for command 'send:mail': -silent,-S - is required\n");
 });
 
-
 it('SwewCommander :isNeedHelp :showHelp - Commander', function () {
     $args = ['script.php', '-h'];
 
@@ -66,7 +65,7 @@ it('SwewCommander :isNeedHelp :showHelp - Commander', function () {
         'TestHelper' => $helper,
     ] = testFactory($args);
 
-    $msg = <<<MSG
+    $msg = <<<'MSG'
 Available commands:
  send:mail: Command to send email
 
@@ -83,7 +82,7 @@ it('SwewCommander :isNeedHelp :showHelp - Command', function () {
         'TestHelper' => $helper,
     ] = testFactory($args);
 
-    $msg = <<<MSG
+    $msg = <<<'MSG'
 Description:
  Command to send email
 
@@ -99,4 +98,14 @@ Options:
 MSG;
 
     expect($helper->getOutputContentAndClear())->toBe($msg);
+});
+
+
+
+it('CommandArgument get all arguments', function () {
+    $args = ['script.php', 'send:mail', 'user@mail.com', '--count', '1', 'test/file.spec.php'];
+    [
+        'SwewCommander' => $sc,
+        'TestHelper' => $helper,
+    ] = testFactory($args);
 });

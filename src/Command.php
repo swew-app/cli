@@ -12,9 +12,11 @@ use Swew\Cli\Terminal\Output;
 abstract class Command
 {
     public const NAME = '';
+
     public const DESCRIPTION = '';
 
     public const SUCCESS = 0;
+
     public const ERROR = 1;
 
     protected mixed $commander = null;
@@ -24,6 +26,9 @@ abstract class Command
 
     /** @var CommandArgument[] */
     private array $commandArguments = [];
+
+    /** @var array<string> */
+    private array $args = [];
 
     abstract public function __invoke(): int;
 
@@ -36,8 +41,18 @@ abstract class Command
         $this->output = $output;
     }
 
+    final public function setArgs(array $args): void
+    {
+        $this->args = $args;
+    }
+
+    final public function getArgs(): array
+    {
+        return $this->args;
+    }
+
     /**
-     * @param CommandArgument[] $commandArguments
+     * @param  CommandArgument[]  $commandArguments
      */
     final public function setCommandArguments(array $commandArguments): void
     {
@@ -56,9 +71,11 @@ abstract class Command
             if ($value->isValid() === false) {
                 $name = $this->getName();
                 $msg = $value->getErrorMessage();
+
                 return "Get error for command '<b>$name</>': $msg";
             }
         }
+
         return '';
     }
 
@@ -83,23 +100,18 @@ abstract class Command
         if ($spacePos === false) {
             return $str;
         }
+
         return substr($str, 0, $spacePos);
     }
 
     /**
      * Method for displaying help message for the current command by template
-     *
-     *
-     *
-     *
-     * @param string $messageTemplate
-     * @return string
      */
     public function getHelpMessage(string $messageTemplate = ''): string
     {
         if ($messageTemplate === '') {
-            $messageTemplate = "<yellow>Description:</>\n {desc}\n\n" .
-                "<yellow>Usage:</>\n {name} [options]\n\n" .
+            $messageTemplate = "<yellow>Description:</>\n {desc}\n\n".
+                "<yellow>Usage:</>\n {name} [options]\n\n".
                 "Options:\n{options}";
         }
 
@@ -120,9 +132,9 @@ abstract class Command
 
         foreach ($options as $name => $desc) {
             if (strlen($desc) > 0) {
-                $params[] = ' <green>' . str_pad($name, $optionKeyMaxLengths + 2, ' ') . '</>' . $desc;
+                $params[] = ' <green>'.str_pad($name, $optionKeyMaxLengths + 2, ' ').'</>'.$desc;
             } else {
-                $params[] = ' <green>' . $name . '</>';
+                $params[] = ' <green>'.$name.'</>';
             }
         }
 
@@ -142,6 +154,7 @@ abstract class Command
     final public function argv(string $key): mixed
     {
         $arg = $this->arg($key);
+
         return $arg->getValue();
     }
 
@@ -167,7 +180,7 @@ abstract class Command
     final public function callSilent(): void
     {
         // TODO
-        return;
+
     }
 
     final public function getCommander(): mixed

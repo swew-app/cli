@@ -75,16 +75,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.53",
+            "version": "1.12.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "0c48595cce15f67d6a7faf30e9d13c775e6e9875"
+                "reference": "9b469068840cfa031e1deaf2fa1886d00e20680f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/0c48595cce15f67d6a7faf30e9d13c775e6e9875",
-                "reference": "0c48595cce15f67d6a7faf30e9d13c775e6e9875",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9b469068840cfa031e1deaf2fa1886d00e20680f",
+                "reference": "9b469068840cfa031e1deaf2fa1886d00e20680f",
                 "shasum": ""
             },
             "require": {
@@ -127,26 +127,22 @@
                 {
                     "url": "https://github.com/phpstan",
                     "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/phpstan/phpstan",
-                    "type": "tidelift"
                 }
             ],
-            "time": "2024-01-05T13:55:38+00:00"
+            "time": "2024-12-17T17:00:20+00:00"
         },
         {
             "name": "psalm/phar",
-            "version": "5.18.0",
+            "version": "5.26.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/psalm/phar.git",
-                "reference": "a78b5c2e8860c3b4242c63bc0864621278705f9a"
+                "reference": "8a38e7ad04499a0ccd2c506fd1da6fc01fff4547"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/psalm/phar/zipball/a78b5c2e8860c3b4242c63bc0864621278705f9a",
-                "reference": "a78b5c2e8860c3b4242c63bc0864621278705f9a",
+                "url": "https://api.github.com/repos/psalm/phar/zipball/8a38e7ad04499a0ccd2c506fd1da6fc01fff4547",
+                "reference": "8a38e7ad04499a0ccd2c506fd1da6fc01fff4547",
                 "shasum": ""
             },
             "require": {
@@ -166,22 +162,22 @@
             "description": "Composer-based Psalm Phar",
             "support": {
                 "issues": "https://github.com/psalm/phar/issues",
-                "source": "https://github.com/psalm/phar/tree/5.18.0"
+                "source": "https://github.com/psalm/phar/tree/5.26.1"
             },
-            "time": "2023-12-16T09:41:14+00:00"
+            "time": "2024-09-09T16:22:43+00:00"
         },
         {
             "name": "swew/dd",
-            "version": "v1.3.1",
+            "version": "v1.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swew-app/dd.git",
-                "reference": "184e62b6dcb302531bdd192e253fc692b60ef9f2"
+                "reference": "afcb52970e149fd5d01dd2916d1e3a95f841e1c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swew-app/dd/zipball/184e62b6dcb302531bdd192e253fc692b60ef9f2",
-                "reference": "184e62b6dcb302531bdd192e253fc692b60ef9f2",
+                "url": "https://api.github.com/repos/swew-app/dd/zipball/afcb52970e149fd5d01dd2916d1e3a95f841e1c0",
+                "reference": "afcb52970e149fd5d01dd2916d1e3a95f841e1c0",
                 "shasum": ""
             },
             "type": "library",
@@ -203,22 +199,22 @@
             "description": "The simplest way to debug variables. As in Laravel.",
             "support": {
                 "issues": "https://github.com/swew-app/dd/issues",
-                "source": "https://github.com/swew-app/dd/tree/v1.3.1"
+                "source": "https://github.com/swew-app/dd/tree/v1.4.2"
             },
-            "time": "2023-07-30T13:55:18+00:00"
+            "time": "2024-01-11T09:55:43+00:00"
         },
         {
             "name": "swew/test.phar",
-            "version": "v1.5.13",
+            "version": "v1.5.22",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swew-app/test.phar.git",
-                "reference": "65dcd7ea4892e92cf4eedfb17f768357eceb42be"
+                "reference": "02d11e8cfbc8ce5ebdf36c99d98ecc93a16cf26c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swew-app/test.phar/zipball/65dcd7ea4892e92cf4eedfb17f768357eceb42be",
-                "reference": "65dcd7ea4892e92cf4eedfb17f768357eceb42be",
+                "url": "https://api.github.com/repos/swew-app/test.phar/zipball/02d11e8cfbc8ce5ebdf36c99d98ecc93a16cf26c",
+                "reference": "02d11e8cfbc8ce5ebdf36c99d98ecc93a16cf26c",
                 "shasum": ""
             },
             "require": {
@@ -261,19 +257,19 @@
             ],
             "support": {
                 "issues": "https://github.com/swew-app/test.phar/issues",
-                "source": "https://github.com/swew-app/test.phar/tree/v1.5.13"
+                "source": "https://github.com/swew-app/test.phar/tree/v1.5.22"
             },
-            "time": "2024-01-05T14:35:15+00:00"
+            "time": "2024-10-03T13:39:42+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.1"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }
