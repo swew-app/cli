@@ -19,10 +19,10 @@ abstract class Command
 
     public const ERROR = 1;
 
-    protected mixed $commander = null;
+    protected SwewCommander|null $commander = null;
 
     /** @var Output */
-    protected ?Output $output = null;
+    protected Output|null $output = null;
 
     /** @var CommandArgument[] */
     private array $commandArguments = [];
@@ -66,13 +66,13 @@ abstract class Command
 
     final public function getErrorMessage(): string
     {
-        foreach ($this->commandArguments as $value) {
-            /** @var CommandArgument $value */
-            if ($value->isValid() === false) {
-                $name = $this->getName();
-                $msg = $value->getErrorMessage();
-
-                return "Get error for command '<b>$name</>': $msg";
+        foreach ($this->commandArguments as $argument) {
+            if (!$argument->isValid()) {
+                return sprintf(
+                    "Get error for command '<b>%s</>': %s",
+                    $this->getName(),
+                    $argument->getErrorMessage()
+                );
             }
         }
 
@@ -81,9 +81,8 @@ abstract class Command
 
     final public function isValid(): bool
     {
-        foreach ($this->commandArguments as $value) {
-            /** @var CommandArgument $value */
-            if ($value->isValid() === false) {
+        foreach ($this->commandArguments as $argument) {
+            if (!$argument->isValid()) {
                 return false;
             }
         }
@@ -93,15 +92,10 @@ abstract class Command
 
     final public function getName(): string
     {
-        /** @var string $str */
-        $str = $this::NAME;
-        $str = str_replace("\n", ' ', $str);
-        $spacePos = strpos($str, ' ');
-        if ($spacePos === false) {
-            return $str;
-        }
+        $name = static::NAME;
+        $name = str_replace("\n", ' ', $name);
 
-        return substr($str, 0, $spacePos);
+        return strtok($name, ' ') ?: $name;
     }
 
     /**
@@ -115,47 +109,33 @@ abstract class Command
                 "Options:\n{options}";
         }
 
-        $optionKeyMaxLengths = 0;
-
         $options = [];
+        $maxLength = 0;
 
         foreach ($this->commandArguments as $arg) {
             $name = $arg->getNames();
             $options[$name] = $arg->getDescription();
-
-            if ($optionKeyMaxLengths < strlen($name)) {
-                $optionKeyMaxLengths = strlen($name);
-            }
+            $maxLength = max($maxLength, strlen($name));
         }
 
-        $params = [];
-
-        foreach ($options as $name => $desc) {
-            if (strlen($desc) > 0) {
-                $params[] = ' <green>'.str_pad($name, $optionKeyMaxLengths + 2, ' ').'</>'.$desc;
-            } else {
-                $params[] = ' <green>'.$name.'</>';
-            }
-        }
-
-        $varsForTmp = [
-            '{desc}' => $this::DESCRIPTION,
-            '{name}' => $this->getName(),
-            '{options}' => implode("\n", $params),
-        ];
+        $formattedOptions = array_map(
+            fn(string $name, string $desc) => $desc
+                ? sprintf(' <green>%s</>%s', str_pad($name, $maxLength + 2, ' '), $desc)
+                : sprintf(' <green>%s</>', $name),
+            array_keys($options),
+            array_values($options)
+        );
 
         return str_replace(
-            array_keys($varsForTmp),
-            array_values($varsForTmp),
+            ['{desc}', '{name}', '{options}'],
+            [static::DESCRIPTION, $this->getName(), implode("\n", $formattedOptions)],
             $messageTemplate
         );
     }
 
     final public function argv(string $key): mixed
     {
-        $arg = $this->arg($key);
-
-        return $arg->getValue();
+        return $this->arg($key)->getValue();
     }
 
     final public function arg(string $name): CommandArgument
@@ -166,7 +146,7 @@ abstract class Command
             }
         }
 
-        throw new LogicException("Can't find argument '$name'");
+        throw new LogicException(sprintf("Can't find argument '%s'", $name));
     }
 
     /**
@@ -183,12 +163,12 @@ abstract class Command
 
     }
 
-    final public function getCommander(): mixed
+    final public function getCommander(): SwewCommander
     {
-        if ($this->commander instanceof SwewCommander) {
-            return $this->commander;
-        } else {
+        if (!$this->commander instanceof SwewCommander) {
             throw new LogicException('SwewCommander instance not transferred');
         }
+
+        return $this->commander;
     }
 }
