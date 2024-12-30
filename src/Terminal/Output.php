@@ -6,19 +6,19 @@ namespace Swew\Cli\Terminal;
 
 class Output
 {
-    private $input;
-
-    private $output;
-
+    private mixed $input;
+    private mixed $output;
     private bool $ansi = true;
-
     private bool|null|string $sttyMode = null;
+    private readonly bool $useExec;
+    private static array $formats = [];
 
     public function __construct(
         mixed $stdin = null,
         mixed $stdout = null,
-        private readonly bool $useExec = true
+        bool $useExec = true
     ) {
+        $this->useExec = $useExec;
         $input = $stdin ?? fopen('php://stdin', 'r');
         $output = $stdout ?? fopen('php://output', 'r');
 
@@ -100,31 +100,30 @@ class Output
 
     public function table(array $titles, array $lines): void
     {
-        // Define the data to display in the table
-        $data = [
-            $titles,
-            ...$lines,
-        ];
-
-        // Determine the maximum width of each column
+        // Pre-calculate column widths
         $columnWidths = [];
+        $data = [$titles, ...$lines];
+
         foreach ($data as $row) {
             foreach ($row as $columnIndex => $value) {
-                $columnWidths[$columnIndex] = max(strlen(strval($value)) + 1, $columnWidths[$columnIndex] ?? 0);
+                $columnWidths[$columnIndex] = max(
+                    strlen(strval($value)) + 1,
+                    $columnWidths[$columnIndex] ?? 0
+                );
             }
         }
 
-        // Output the table header
-        $line = '';
-        foreach ($data[0] as $columnIndex => $value) {
-            $line .= sprintf("%-{$columnWidths[$columnIndex]}s ", " $value");
+        // Build and output header
+        $header = '';
+        foreach ($titles as $columnIndex => $value) {
+            $header .= sprintf("%-{$columnWidths[$columnIndex]}s ", " $value");
         }
-        $this->writeLn($line, '<bgBlue><b><i>%s</>');
+        $this->writeLn($header, '<bgBlue><b><i>%s</>');
 
-        // Output the table rows
-        for ($i = 1; $i < count($data); $i++) {
+        // Build and output rows
+        foreach ($lines as $i => $row) {
             $line = '';
-            foreach ($data[$i] as $columnIndex => $value) {
+            foreach ($row as $columnIndex => $value) {
                 $line .= sprintf("%-{$columnWidths[$columnIndex]}s ", " $value");
             }
             $format = $i % 2 === 0 ? '<blue>%s</>' : '<white>%s</>';
@@ -366,55 +365,64 @@ class Output
 
     private function isInteractiveInput(mixed $inputStream): bool
     {
+        // Check if the stream is stdin
         if ('php://stdin' !== (stream_get_meta_data($inputStream)['uri'])) {
             return false;
         }
 
+        // Try stream_isatty first as it's the most reliable
         if (\function_exists('stream_isatty')) {
-            return @stream_isatty(fopen('php://stdin', 'r'));
+            return @stream_isatty($inputStream);
         }
 
+        // Fallback to posix_isatty if available
         if (\function_exists('posix_isatty')) {
-            return @posix_isatty(fopen('php://stdin', 'r'));
+            return @posix_isatty($inputStream);
         }
 
-        if (! \function_exists('exec')) {
+        // Last resort - check if stty command works
+        if (!\function_exists('exec')) {
             return true;
         }
 
         exec('stty 2> /dev/null', $output, $status);
-
-        return 1 !== $status;
+        return $status !== 1;
     }
 
     private function readKeyPress(): ?string
     {
-        // Читаем 3 или 4 байта для escape-последовательности стрелок
+        // Read 3 or 4 bytes for the escape-sequence of the arrows
         $key = fread($this->input, 4);
+        if (empty($key)) {
+            return null;
+        }
 
         $k0 = ord($key[0]);
 
-        if ($k0 === 32) {
+        // Handle single character keys
+        if ($k0 === 32) { // Space
             return 'SPACE';
         }
-        if ($k0 === 10) {
+        if ($k0 === 10) { // Enter
             return 'ENTER';
         }
 
-        $k1 = ord($key[1]);
-        $k2 = ord($key[2]);
+        // Handle arrow keys and other special keys
+        if ($k0 === 27 && isset($key[1], $key[2])) { // ESC sequence
+            $k1 = ord($key[1]);
+            $k2 = ord($key[2]);
 
-        if ($k0 !== 27 || $k1 !== 91) {
-            return null; // Не escape-последовательность
-        }
-
-        switch ($k2) {
-            case 65: return 'UP';
-            case 66: return 'DOWN';
-            case 67: return 'RIGHT';
-            case 68: return 'LEFT';
-            case 32: return 'SPACE';
-            case 10: return 'ENTER';
+            if ($k1 === 91) { // [
+                return match ($k2) {
+                    65 => 'UP',
+                    66 => 'DOWN',
+                    67 => 'RIGHT',
+                    68 => 'LEFT',
+                    32 => 'SPACE',
+                    10 => 'ENTER',
+                    default => null
+                };
+            }
         }
 
         return null;
@@ -424,11 +432,12 @@ class Output
     {
         $isTerm = getenv('TERM_PROGRAM') === 'Apple_Terminal';
 
-        $formats = [
+        self::$formats = [
             // reset
             '</>' => "\e[m",
             '<br>' => PHP_EOL,
 
+            // Text styles
             '<b>' => "\e[1m",
             '<f>' => "\e[2m",
             '<i>' => "\e[3m",
@@ -437,6 +446,7 @@ class Output
             '<hidden>' => "\e[8m",
             '<s>' => "\e[9m",
 
+            // Colors
             '<black>' => "\e[38;5;16m",
             '<gray>' => "\e[38;5;8m",
             '<white>' => "\e[38;5;7m",
@@ -447,6 +457,7 @@ class Output
             '<purple>' => "\e[38;5;13m",
             '<cyan>' => "\e[38;5;6m",
 
+            // Background colors
             '<bgBlack>' => "\e[48;5;16m",
             '<bgGray>' => "\e[48;5;8m",
             '<bgWhite>' => "\e[48;5;7m",
@@ -457,6 +468,7 @@ class Output
             '<bgPurple>' => "\e[48;5;13m",
             '<bgCyan>' => "\e[48;5;6m",
 
+            // Cursor and screen control
             '<saveCursor>' => $isTerm ? "\e[8n" : "\e[s",
             '<restoreCursor>' => $isTerm ? "\e[7n" : "\e[u",
             '<eraseToEndLine>' => "\e[K",
@@ -470,6 +482,8 @@ class Output
             '<show>' => "\e?25h",
             '<hide>' => "\e?25l",
             '<getPosition>' => "\e6n",
+
+            // Up movement
             '<up_1>' => "\e[1A",
             '<up_2>' => "\e[2A",
             '<up_3>' => "\e[3A",
@@ -484,8 +498,8 @@ class Output
         $text = str_replace('<br>', PHP_EOL, $text);
 
         return str_replace(
-            array_keys($formats),
-            $this->ansi ? array_values($formats) : '',
+            array_keys(self::$formats),
+            $this->ansi ? array_values(self::$formats) : '',
             $text
         );
     }

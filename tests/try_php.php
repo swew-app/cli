@@ -35,13 +35,13 @@ $output->writeLn("\n\n");
 
 
 
-/*
+// /*
 for ($i = 0; $i <= 255; $i++) {
     if ($i > 0 && $i % 8 === 0) {
         $output->newLine();
     }
     $title = str_pad("  $i", 7, ' ');
-    $output->write($i, "\e[48;5;${i}m${title}</> ");
+    $output->write($i, "\e[48;5;{$i}m{$title}</> ");
 }
 $output->writeLn("\n");
 // */
