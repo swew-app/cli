@@ -95,7 +95,10 @@ abstract class Command
         $name = static::NAME;
         $name = str_replace("\n", ' ', $name);
 
-        return strtok($name, ' ') ?: $name;
+        if (is_string(($name))) {
+            return strtok($name, ' ') ?: $name;
+        }
+        return '';
     }
 
     /**
@@ -119,7 +122,7 @@ abstract class Command
         }
 
         $formattedOptions = array_map(
-            fn(string $name, string $desc) => $desc
+            fn (string $name, string $desc) => $desc
                 ? sprintf(' <green>%s</>%s', str_pad($name, $maxLength + 2, ' '), $desc)
                 : sprintf(' <green>%s</>', $name),
             array_keys($options),

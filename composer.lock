@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b357067a573f2490b54b45822b21c66",
+    "content-hash": "4b7ccf5a5f648f53dec7823e3e8f6a21",
     "packages": [],
     "packages-dev": [
         {
             "name": "laravel/pint",
-            "version": "v1.9.0",
+            "version": "v1.21.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/pint.git",
-                "reference": "eac5ec3d6b5c96543c682e309a10fdddc9f61d80"
+                "reference": "370772e7d9e9da087678a0edf2b11b6960e40558"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/pint/zipball/eac5ec3d6b5c96543c682e309a10fdddc9f61d80",
-                "reference": "eac5ec3d6b5c96543c682e309a10fdddc9f61d80",
+                "url": "https://api.github.com/repos/laravel/pint/zipball/370772e7d9e9da087678a0edf2b11b6960e40558",
+                "reference": "370772e7d9e9da087678a0edf2b11b6960e40558",
                 "shasum": ""
             },
             "require": {
@@ -26,16 +26,16 @@
                 "ext-mbstring": "*",
                 "ext-tokenizer": "*",
                 "ext-xml": "*",
-                "php": "^8.1.0"
+                "php": "^8.2.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.16.0",
-                "illuminate/view": "^10.5.1",
-                "laravel-zero/framework": "^10.0.2",
-                "mockery/mockery": "^1.5.1",
-                "nunomaduro/larastan": "^2.5.1",
-                "nunomaduro/termwind": "^1.15.1",
-                "pestphp/pest": "^2.4.0"
+                "friendsofphp/php-cs-fixer": "^3.72.0",
+                "illuminate/view": "^11.44.2",
+                "larastan/larastan": "^3.2.0",
+                "laravel-zero/framework": "^11.36.1",
+                "mockery/mockery": "^1.6.12",
+                "nunomaduro/termwind": "^2.3",
+                "pestphp/pest": "^2.36.0"
             },
             "bin": [
                 "builds/pint"
@@ -71,20 +71,20 @@
                 "issues": "https://github.com/laravel/pint/issues",
                 "source": "https://github.com/laravel/pint"
             },
-            "time": "2023-04-18T14:50:44+00:00"
+            "time": "2025-03-14T22:31:42+00:00"
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.13",
+            "version": "1.12.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "9b469068840cfa031e1deaf2fa1886d00e20680f"
+                "reference": "29201e7a743a6ab36f91394eab51889a82631428"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9b469068840cfa031e1deaf2fa1886d00e20680f",
-                "reference": "9b469068840cfa031e1deaf2fa1886d00e20680f",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/29201e7a743a6ab36f91394eab51889a82631428",
+                "reference": "29201e7a743a6ab36f91394eab51889a82631428",
                 "shasum": ""
             },
             "require": {
@@ -129,24 +129,24 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-17T17:00:20+00:00"
+            "time": "2025-03-23T14:57:32+00:00"
         },
         {
             "name": "psalm/phar",
-            "version": "5.26.1",
+            "version": "6.9.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/psalm/phar.git",
-                "reference": "8a38e7ad04499a0ccd2c506fd1da6fc01fff4547"
+                "reference": "ae7a4fffa0a178348a9b590b4500d8e0b48737eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/psalm/phar/zipball/8a38e7ad04499a0ccd2c506fd1da6fc01fff4547",
-                "reference": "8a38e7ad04499a0ccd2c506fd1da6fc01fff4547",
+                "url": "https://api.github.com/repos/psalm/phar/zipball/ae7a4fffa0a178348a9b590b4500d8e0b48737eb",
+                "reference": "ae7a4fffa0a178348a9b590b4500d8e0b48737eb",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1 || ^8.0"
+                "php": "^8.2"
             },
             "conflict": {
                 "vimeo/psalm": "*"
@@ -162,9 +162,9 @@
             "description": "Composer-based Psalm Phar",
             "support": {
                 "issues": "https://github.com/psalm/phar/issues",
-                "source": "https://github.com/psalm/phar/tree/5.26.1"
+                "source": "https://github.com/psalm/phar/tree/6.9.6"
             },
-            "time": "2024-09-09T16:22:43+00:00"
+            "time": "2025-03-27T19:19:48+00:00"
         },
         {
             "name": "swew/dd",
@@ -205,16 +205,16 @@
         },
         {
             "name": "swew/test.phar",
-            "version": "v1.5.22",
+            "version": "v1.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swew-app/test.phar.git",
-                "reference": "02d11e8cfbc8ce5ebdf36c99d98ecc93a16cf26c"
+                "reference": "b34f043f7cf8e70b1b9e5645b8ead2055ce5e832"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swew-app/test.phar/zipball/02d11e8cfbc8ce5ebdf36c99d98ecc93a16cf26c",
-                "reference": "02d11e8cfbc8ce5ebdf36c99d98ecc93a16cf26c",
+                "url": "https://api.github.com/repos/swew-app/test.phar/zipball/b34f043f7cf8e70b1b9e5645b8ead2055ce5e832",
+                "reference": "b34f043f7cf8e70b1b9e5645b8ead2055ce5e832",
                 "shasum": ""
             },
             "require": {
@@ -257,9 +257,9 @@
             ],
             "support": {
                 "issues": "https://github.com/swew-app/test.phar/issues",
-                "source": "https://github.com/swew-app/test.phar/tree/v1.5.22"
+                "source": "https://github.com/swew-app/test.phar/tree/v1.6.2"
             },
-            "time": "2024-10-03T13:39:42+00:00"
+            "time": "2024-12-30T19:00:59+00:00"
         }
     ],
     "aliases": [],
@@ -268,7 +268,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.1"
+        "php": ">=8.3"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"

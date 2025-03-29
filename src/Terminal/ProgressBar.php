@@ -28,7 +28,7 @@ class ProgressBar
     {
         $this->index++;
 
-        $progress = intval($this->index / $this->total * 100);
+        $progress = intval($this->index / $this->total) * 100;
 
         if ($progress > 100) {
             $progress = 100;

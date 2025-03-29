@@ -22,7 +22,7 @@ class Output
         $input = $stdin ?? fopen('php://stdin', 'r');
         $output = $stdout ?? fopen('php://output', 'r');
 
-        if (! is_resource($output) || ! is_resource($input)) {
+        if (!is_resource($output) || !is_resource($input)) {
             throw new \Exception("Wrong type for \$output:($output) or \$input:($input) stream");
         }
 
@@ -41,8 +41,8 @@ class Output
         if (is_resource($this->output)) {
             fclose($this->output);
         }
-        if ($this->sttyMode) {
-            $this->exec('stty '.$this->sttyMode);
+        if ($this->sttyMode && is_string($this->sttyMode)) {
+            $this->exec('stty ' . $this->sttyMode);
         }
     }
 
@@ -71,7 +71,7 @@ class Output
 
     public function writeLn(string|int|float $text, string $format = '%s'): void
     {
-        $this->write($text, $format."\n");
+        $this->write($text, $format . "\n");
     }
 
     public function info(mixed $text): void
@@ -98,6 +98,10 @@ class Output
         $this->write($nl);
     }
 
+    /**
+     * @param array<int,string> $titles
+     * @param array<int,array<int,mixed>> $lines
+     */
     public function table(array $titles, array $lines): void
     {
         // Pre-calculate column widths
@@ -147,7 +151,7 @@ class Output
     {
         $isInteractive = $this->isInteractiveInput($this->input);
 
-        if (! $isInteractive) {
+        if (!$isInteractive) {
             return $default;
         }
 
@@ -161,7 +165,7 @@ class Output
     {
         $isInteractive = $this->isInteractiveInput($this->input);
 
-        if (! $isInteractive) {
+        if (!$isInteractive) {
             return $answer;
         }
 
@@ -195,7 +199,7 @@ class Output
                 case 'DOWN': // Down arrow
                 case 'RIGHT': // Right arrow
                 case 'LEFT': // Left arrow
-                    $answer = ! $answer;
+                    $answer = !$answer;
                     break;
                 case 'SPACE': // Space
                 case 'ENTER': // Enter key
@@ -203,7 +207,9 @@ class Output
             }
         }
 
-        $this->exec('stty '.$this->sttyMode);
+        if (is_string($this->sttyMode)) {
+            $this->exec('stty ' . $this->sttyMode);
+        }
         $this->write('<up_2><eraseToBottom>');
 
         $this->write($answer ? '<green>✓</>' : '<red>✘</>');
@@ -216,7 +222,7 @@ class Output
     {
         $isInteractive = $this->isInteractiveInput($this->input);
 
-        if (! $isInteractive) {
+        if (!$isInteractive) {
             return $default;
         }
 
@@ -234,7 +240,7 @@ class Output
     {
         $val = $this->select($text, $options, [], $isRequired, false);
 
-        return current($val);
+        return (string) current($val);
     }
 
     public function select(
@@ -247,7 +253,7 @@ class Output
         $isInteractive = $this->isInteractiveInput($this->input);
         $selected = array_fill_keys($selectedIndex, true);
 
-        if (! $isInteractive) {
+        if (!$isInteractive) {
             return array_filter(
                 $options,
                 fn (int $index) => isset($selected[$index]),
@@ -313,13 +319,13 @@ class Output
                     } else {
                         $selected[$cursorIndex] = true;
 
-                        if (! $isMultiple) {
+                        if (!$isMultiple) {
                             break 2;
                         }
                     }
                     break;
                 case 'ENTER': // Enter key
-                    if (! $isMultiple) {
+                    if (!$isMultiple) {
                         $selected[$cursorIndex] = true;
                         break 2;
                     }
@@ -335,7 +341,9 @@ class Output
             $this->write("<up_$numberOfLinesDrawnLAST><eraseToBottom>");
         }
 
-        $this->exec('stty '.$this->sttyMode);
+        if (is_string($this->sttyMode)) {
+            $this->exec('stty ' . $this->sttyMode);
+        }
 
         return array_filter(
             $options,

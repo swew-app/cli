@@ -9,12 +9,15 @@ use Swew\Cli\Terminal\Output;
 
 class SwewCommander
 {
+    /** @var array<string, class-string<Command>> */
     protected array $commands = [];
 
+    /** @var array<string, class-string<Command>> */
     private array $commandMap = [];
 
     private string $helpPrefix = '';
 
+    /** @var array<int, string> */
     private readonly array $argList;
 
     public function __construct(
@@ -23,9 +26,7 @@ class SwewCommander
         private readonly bool $stopByStatus = true
     ) {
         $this->argList = array_slice($argv, 1);
-
         $this->setCommands($this->commands);
-
         $this->init();
     }
 
@@ -38,9 +39,8 @@ class SwewCommander
 
     public function run(): void
     {
-        if ($this->isNeedHelp() || count($this->argList) === 0) {
+        if ($this->isNeedHelp() || empty($this->argList)) {
             $this->showHelp();
-
             return;
         }
 
@@ -53,19 +53,15 @@ class SwewCommander
 
     public function call(string $commandName, array $args = []): int
     {
-        /** @var Command $command */
         $command = $this->getCommand($commandName, $args);
 
         if ($command->isValid()) {
             $command->init();
-            $status = $command();
-        } else {
-            $status = $command::ERROR;
-            $errorMessage = $command->getErrorMessage();
-            $this->output->error($errorMessage);
+            return $command();
         }
 
-        return $status;
+        $this->output->error($command->getErrorMessage());
+        return Command::ERROR;
     }
 
     public function setHelpPrefix(string $helpPrefix): void
@@ -73,18 +69,20 @@ class SwewCommander
         $this->helpPrefix = $helpPrefix;
     }
 
+    /**
+     * @param array<class-string<Command>> $commands
+     */
     protected function setCommands(array $commands): void
     {
-        $this->commandMap = [];
-
-        foreach ($commands as $commandClass) {
-            $name = $this->parseName($commandClass);
-            $this->commandMap[$name] = $commandClass;
-        }
+        $this->commandMap = array_reduce(
+            $commands,
+            fn (array $map, string $commandClass) => $map + [$this->parseName($commandClass) => $commandClass],
+            []
+        );
     }
 
     /**
-     * @param  string  $name Command NAME or Command class
+     * @param array<string> $args
      */
     protected function getCommand(string $name, array $args = []): Command
     {
@@ -92,29 +90,26 @@ class SwewCommander
             $name = $this->parseName($name);
         }
 
-        $args = count($args) === 0 ? $this->argList : $args;
-
-        if (isset($this->commandMap[$name])) {
-            /** @var Command $command */
-            $command = new $this->commandMap[$name]();
-
-            $command->setOutput($this->output);
-            $command->setArgs($this->argList);
-
-            if (isset($args[0]) && $args[0] === $name) {
-                array_shift($args);
-            }
-
-            $this->fillCommandArguments($command, $args);
-
-            return $command;
+        if (!isset($this->commandMap[$name])) {
+            throw new \LogicException("Command '$name' not found");
         }
 
-        throw new \LogicException("Command '$name' not found");
+        $args = empty($args) ? $this->argList : $args;
+        $command = new $this->commandMap[$name]();
+        $command->setOutput($this->output);
+        $command->setArgs($this->argList);
+
+        if (isset($args[0]) && $args[0] === $name) {
+            array_shift($args);
+        }
+
+        $this->fillCommandArguments($command, $args);
+
+        return $command;
     }
 
     /**
-     * Fills arguments with "CommandArgument" values that can be worked with
+     * @param array<string> $argsForCommand
      */
     protected function fillCommandArguments(Command &$command, array $argsForCommand): void
     {
@@ -135,32 +130,22 @@ class SwewCommander
 
     protected function isNeedHelp(): bool
     {
-        return in_array('-h', $this->argList)
-            || in_array('-help', $this->argList)
-            || in_array('--help', $this->argList)
-            || in_array('help', $this->argList);
+        $helpFlags = ['-h', '-help', '--help', 'help'];
+        return !empty(array_intersect($helpFlags, $this->argList));
     }
 
     protected function showHelp(): void
     {
-        $name = '';
+        $name = $this->argList[0] ?? '';
+        $class = isset($this->commandMap[$name])
+            ? new $this->commandMap[$name]()
+            : $this;
 
-        if (count($this->argList) === 2) {
-            $name = $this->argList[0];
-        }
-
-        if (isset($this->commandMap[$name])) {
-            /** @var Command */
-            $class = new $this->commandMap[$name]();
-
+        if ($class instanceof Command) {
             $this->fillCommandArguments($class, []);
-        } else {
-            $class = $this;
         }
 
-        $helpMessage = $class->getHelpMessage();
-
-        $this->output->writeLn($helpMessage);
+        $this->output->writeLn($class->getHelpMessage());
     }
 
     protected function getHelpMessage(): string
@@ -173,11 +158,9 @@ class SwewCommander
 
         $result[] = '<yellow>Available commands:</>';
 
-        // проходим по списку команд и собираем название и десприпшен
         foreach ($this->commandMap as $commandClass) {
             $name = $this->parseName($commandClass);
             $description = $commandClass::DESCRIPTION;
-
             $result[] = " <green>$name</>: $description";
         }
 
@@ -192,10 +175,7 @@ class SwewCommander
 
         $str = str_replace("\n", '', $str);
         $spacePos = strpos($str, ' ');
-        if ($spacePos === false) {
-            return $str;
-        }
 
-        return substr($str, 0, $spacePos);
+        return $spacePos === false ? $str : substr($str, 0, $spacePos);
     }
 }
