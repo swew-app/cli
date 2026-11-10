@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3c7b21c0ba358f49417af1e9f9f83cb4",
+    "content-hash": "c49a0246752b9c1ab10597a3d7bc9c6d",
     "packages": [],
     "packages-dev": [
         {
@@ -180,32 +180,36 @@
             "time": "2024-01-11T09:55:43+00:00"
         },
         {
-            "name": "swew/test.phar",
-            "version": "v1.7.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/swew-app/test.phar.git",
-                "reference": "49e2d413f33b8cd4acfdfe0ba8e69add81649bb7"
-            },
+            "name": "swew/test",
+            "version": "dev-master",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/swew-app/test.phar/zipball/49e2d413f33b8cd4acfdfe0ba8e69add81649bb7",
-                "reference": "49e2d413f33b8cd4acfdfe0ba8e69add81649bb7",
-                "shasum": ""
+                "type": "path",
+                "url": "../test",
+                "reference": "10459facc82c2329e3c27c6bb95ef1f1148476b8"
             },
             "require": {
                 "ext-json": "*",
-                "php": ">=8.1"
+                "ext-mbstring": "*",
+                "ext-pcntl": "*",
+                "php": ">=8.3",
+                "swew/cli": "^2.0@dev",
+                "swew/dd": "*"
             },
-            "conflict": {
-                "swew/test": "*"
+            "require-dev": {
+                "carthage-software/mago": "1.59.0"
             },
             "bin": [
-                "t",
-                "swew-test.phar"
+                "bin/t",
+                "bin/pest"
             ],
             "type": "library",
             "autoload": {
+                "psr-4": {
+                    "Swew\\Test\\": "src/"
+                },
+                "files": [
+                    "src/Functions.php"
+                ],
                 "exclude-from-classmap": [
                     "spec",
                     "/Tests/",
@@ -213,7 +217,34 @@
                     "/tests/"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "archive": {
+                "exclude": [
+                    "tests",
+                    "swew.json"
+                ]
+            },
+            "scripts": {
+                "test": [
+                    "@php bin/t --dir=tests --config=tests/config.json"
+                ],
+                "static": [
+                    "mago analyze --minimum-report-level warning"
+                ],
+                "lint": [
+                    "mago lint --minimum-report-level warning"
+                ],
+                "code-check": [
+                    "mago format --check"
+                ],
+                "format": [
+                    "mago format"
+                ],
+                "check": [
+                    "@static",
+                    "@lint",
+                    "@code-check"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -231,16 +262,16 @@
                 "lightweight",
                 "testing"
             ],
-            "support": {
-                "issues": "https://github.com/swew-app/test.phar/issues",
-                "source": "https://github.com/swew-app/test.phar/tree/v1.7.1"
-            },
-            "time": "2026-11-10T12:54:18+00:00"
+            "transport-options": {
+                "relative": true
+            }
         }
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "swew/test": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

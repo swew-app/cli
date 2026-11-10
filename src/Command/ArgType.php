@@ -4,34 +4,32 @@ declare(strict_types=1);
 
 namespace Swew\Cli\Command;
 
-enum ArgType
+use InvalidArgumentException;
+
+enum ArgType: string
 {
-    case Int;
-    case Float;
-    case Str;
-    case Bool;
+    case Int = 'int';
+    case Float = 'float';
+    case Str = 'string';
+    case Bool = 'bool';
 
-    public function default(): mixed
+    public function val(string|bool $value): string|int|float|bool
     {
-        return match ($this) {
-            ArgType::Int => 0,
-            ArgType::Float => 0.0,
-            ArgType::Str => '',
-            ArgType::Bool => false,
+        $result = match ($this) {
+            self::Int => is_string($value) ? filter_var($value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) : null,
+            self::Float => is_string($value) && is_numeric($value) && is_finite((float) $value) ? (float) $value : null,
+            self::Str => is_string($value) ? $value : null,
+            self::Bool => match ($value) {
+                true, 'true', '1' => true,
+                false, 'false', '0' => false,
+                default => null,
+            },
         };
-    }
 
-    public function val(mixed $val): mixed
-    {
-        if (is_array($val)) {
-            return array_map(fn($v) => $this->val($v), $val);
+        if ($result === null) {
+            throw new InvalidArgumentException("Expected {$this->value}");
         }
 
-        return match ($this) {
-            ArgType::Int => intval($val),
-            ArgType::Float => floatval($val),
-            ArgType::Str => strval($val),
-            ArgType::Bool => $val === 'false' ? false : boolval($val),
-        };
+        return $result;
     }
 }

@@ -44,6 +44,17 @@
             "/tests/"
         ]
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../test"
+        }
+    ],
+    "extra": {
+        "branch-alias": {
+            "dev-main": "2.0.x-dev"
+        }
+    },
     "prefer-stable": true,
     "minimum-stability": "dev",
     "require": {
@@ -52,7 +63,7 @@
     "require-dev": {
         "carthage-software/mago": "1.59.0",
         "swew/dd": "^1.4.2",
-        "swew/test.phar": "^1.7.1"
+        "swew/test": "dev-master"
     },
     "scripts": {
         "test": "t",

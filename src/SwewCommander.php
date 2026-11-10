@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace Swew\Cli;
 
+use Closure;
+use InvalidArgumentException;
+use LogicException;
 use Swew\Cli\Command\ArgType;
-use Swew\Cli\Command\CommandArgument;
+use Swew\Cli\Command\CommandDefinition;
 use Swew\Cli\Terminal\Output;
 
 class SwewCommander
 {
-    /** @var array<class-string<Command>> */
+    /** @var array<class-string> */
     protected array $commands = [];
 
-    /** @var array<string, class-string<Command>> */
+    /** @var array<string, CommandDefinition> */
     private array $commandMap = [];
 
     private string $helpPrefix = '';
 
     /** @var list<string> */
-    private readonly array $argList;
+    protected readonly array $argList;
 
     /** @param list<string> $argv */
     public function __construct(
@@ -32,16 +35,13 @@ class SwewCommander
         $this->init();
     }
 
-    /**
-     * Method called when creating
-     */
     protected function init(): void
     {
     }
 
     public function run(): void
     {
-        if ($this->isNeedHelp() || empty($this->argList)) {
+        if ($this->isNeedHelp() || $this->argList === []) {
             $this->showHelp();
             return;
         }
@@ -49,7 +49,7 @@ class SwewCommander
         $name = $this->argList[0];
         if (!isset($this->commandMap[$name])) {
             $this->output->error("Command '$name' not found");
-            $status = Command::ERROR;
+            $status = 1;
         } else {
             $status = $this->call($name, array_slice($this->argList, 1));
         }
@@ -62,15 +62,13 @@ class SwewCommander
     /** @param list<string> $args */
     public function call(string $commandName, array $args = []): int
     {
-        $command = $this->getCommand($commandName, $args);
-
-        if ($command->isValid()) {
-            $command->init();
-            return $command();
+        try {
+            $command = $this->getCommand($commandName, $args);
+        } catch (InvalidArgumentException $error) {
+            $this->output->error($error->getMessage());
+            return 1;
         }
-
-        $this->output->error($command->getErrorMessage());
-        return Command::ERROR;
+        return $command();
     }
 
     public function setHelpPrefix(string $helpPrefix): void
@@ -78,104 +76,76 @@ class SwewCommander
         $this->helpPrefix = $helpPrefix;
     }
 
-    /**
-     * @param array<class-string<Command>> $commands
-     */
+    /** @param array<class-string> $commands */
     protected function setCommands(array $commands): void
     {
         $this->commandMap = [];
         foreach ($commands as $commandClass) {
-            $this->commandMap[$this->parseName($commandClass)] ??= $commandClass;
+            $definition = new CommandDefinition($commandClass);
+            $name = $definition->attribute->name;
+            if (isset($this->commandMap[$name])) {
+                throw new LogicException("Duplicate command '$name'");
+            }
+            $this->commandMap[$name] = $definition;
         }
     }
 
     /**
-     * @param list<string>|null $args
+     * @param list<string> $args
+     * @return Closure(): int
      */
-    protected function getCommand(string $name, ?array $args = null): Command
+    protected function getCommand(string $name, array $args = []): Closure
     {
-        if (class_exists($name)) {
-            $name = $this->parseName($name);
-        }
-
-        if (!isset($this->commandMap[$name])) {
-            throw new \LogicException("Command '$name' not found");
-        }
-
-        $command = new $this->commandMap[$name]();
-        $command->setOutput($this->output);
-
-        $command->setArgs($args === null ? $this->argList : [$name, ...$args]);
-        if ($args === null) {
-            $args = $this->argList;
-            if (($args[0] ?? null) === $name) {
-                array_shift($args);
-            }
-        }
-        $this->fillCommandArguments($command, $args);
-
-        return $command;
+        return $this->getDefinition($name)->prepare($this, $this->output, $args);
     }
 
-    /**
-     * @param list<string> $argsForCommand
-     */
-    protected function fillCommandArguments(Command &$command, array $argsForCommand): void
+    public function getCommandHelpMessage(string $name, string $template = ''): string
     {
-        $matches = [];
-        preg_match_all('/{([^}]+)}/', $command::NAME, $matches);
+        return $this->getDefinition($name)->getHelpMessage($template);
+    }
 
-        $commandArguments = [];
-        $position = 0;
-        foreach ($matches[1] as $arg) {
-            $cmdArg = new CommandArgument($arg, $position);
-            $commandArguments[] = $cmdArg;
-            if (!$cmdArg->isArgument()) {
-                $position++;
+    private function getDefinition(string $name): CommandDefinition
+    {
+        if (isset($this->commandMap[$name])) {
+            return $this->commandMap[$name];
+        }
+        foreach ($this->commandMap as $definition) {
+            if ($definition->className === $name) {
+                return $definition;
             }
         }
-
-        $positionals = [];
-        $optionsEnded = false;
-        for ($i = 0, $count = count($argsForCommand); $i < $count; $i++) {
-            $value = $argsForCommand[$i];
-            if (!$optionsEnded && $value === '--') {
-                $optionsEnded = true;
-            } elseif (!$optionsEnded && str_starts_with($value, '-') && !is_numeric($value)) {
-                foreach ($commandArguments as $argument) {
-                    if (
-                        $argument->isArgument()
-                        && $argument->is(ltrim($value, '-'))
-                        && $argument->getType() !== ArgType::Bool
-                    ) {
-                        $next = $argsForCommand[$i + 1] ?? null;
-                        if ($next !== null && (!str_starts_with($next, '-') || is_numeric($next))) {
-                            $i++;
-                        }
-                        break;
-                    }
-                }
-            } else {
-                $positionals[] = $value;
-            }
-        }
-
-        foreach ($commandArguments as $argument) {
-            $argument->parseInput($argument->isArgument() ? $argsForCommand : $positionals);
-        }
-
-        $command->setCommandArguments($commandArguments);
-        $command->setCommanderContext($this);
+        throw new LogicException("Command '$name' not found");
     }
 
     protected function isNeedHelp(): bool
     {
-        $helpFlags = ['-h', '-help', '--help', 'help'];
-        foreach ($this->argList as $arg) {
+        $name = $this->argList[0] ?? '';
+        $definitions = isset($this->commandMap[$name]) ? [$this->commandMap[$name]] : $this->commandMap;
+        for ($i = 0, $count = count($this->argList); $i < $count; $i++) {
+            $arg = $this->argList[$i];
             if ($arg === '--') {
                 break;
             }
-            if (in_array($arg, $helpFlags, true)) {
+            if (CommandDefinition::isOption($arg)) {
+                $parts = explode('=', ltrim($arg, '-'), 2);
+                foreach ($definitions as $definition) {
+                    $option = $definition->option($parts[0]);
+                    if ($option !== null) {
+                        $next = $this->argList[$i + 1] ?? null;
+                        if (
+                            count($parts) === 1
+                            && $option->type !== ArgType::Bool
+                            && $next !== null
+                            && $next !== '--'
+                            && !CommandDefinition::isOption($next)
+                        ) {
+                            $i++;
+                        }
+                        continue 2;
+                    }
+                }
+            }
+            if (in_array($arg, ['-h', '-help', '--help', 'help'], true)) {
                 return true;
             }
         }
@@ -185,40 +155,21 @@ class SwewCommander
     protected function showHelp(): void
     {
         $name = $this->argList[0] ?? '';
-        $class = isset($this->commandMap[$name]) ? new $this->commandMap[$name]() : $this;
-
-        if ($class instanceof Command) {
-            $this->fillCommandArguments($class, []);
-        }
-
-        $this->output->writeLn($class->getHelpMessage());
+        $this->output->writeLn(
+            isset($this->commandMap[$name]) ? $this->getCommandHelpMessage($name) : $this->getHelpMessage(),
+        );
     }
 
     protected function getHelpMessage(): string
     {
         $result = [];
-
-        if ($this->helpPrefix) {
+        if ($this->helpPrefix !== '') {
             $result[] = $this->helpPrefix;
         }
-
         $result[] = '<yellow>Available commands:</>';
-
-        foreach ($this->commandMap as $commandClass) {
-            $name = $this->parseName($commandClass);
-            $description = $commandClass::DESCRIPTION;
-            $result[] = " <green>$name</>: $description";
+        foreach ($this->commandMap as $name => $definition) {
+            $result[] = " <green>$name</>: {$definition->attribute->desc}";
         }
-
         return implode("\n", $result);
-    }
-
-    private function parseName(string $str): string
-    {
-        if (is_a($str, Command::class, true)) {
-            $str = $str::NAME;
-        }
-
-        return preg_split('/\s+/', trim($str), 2)[0] ?? '';
     }
 }

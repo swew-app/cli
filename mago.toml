@@ -7,10 +7,9 @@ includes = ["vendor"]
 
 [analyzer]
 excludes = ["tests"]
-# Mixed values are intentional at I/O boundaries; commands must have no required constructor arguments.
+# Mixed values are intentional at I/O boundaries.
 ignore = [
     { code = "mixed-assignment", in = ["src/Terminal/Output.php"] },
-    { code = "unsafe-instantiation", in = ["src/SwewCommander.php"] },
 ]
 
 [linter.rules]
@@ -20,6 +19,8 @@ cyclomatic-complexity = { level = "note" }
 kan-defect = { level = "note" }
 halstead = { level = "note" }
 too-many-methods = { level = "note" }
+excessive-parameter-list = { level = "note" }
+inline-variable-return = { level = "note" }
 literal-named-argument = { level = "note" }
 no-empty = { level = "note" }
 no-isset = { level = "note" }

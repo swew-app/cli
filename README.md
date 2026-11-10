@@ -17,12 +17,17 @@ The package is a PHP library for building console applications and commands in a
 # Install
 
 ```sh
-composer require swew/cli
+composer require swew/cli:^2.0
 ```
 
 ## Development
 
-Requires PHP 8.3+. Run `composer install`, then:
+This branch targets v2. Requires PHP 8.3+. For development, place `swew/test`
+beside this checkout as `../test`, then run `composer install`. Composer uses the
+source test runner so tests exercise this CLI, not the v1 CLI embedded in the PHAR.
+The `main` branch is aliased to `2.0.x-dev` for local consumers.
+
+Development commands:
 
 - `composer test` — tests (or `composer test -- 'output\.spec\.php$'`).
 - `composer static` — Mago static analysis.
@@ -35,162 +40,174 @@ Mago replaces Psalm, PHPStan, and Pint; Composer uses the pinned local binary.
 Its first run downloads the platform binary, so it needs network access.
 Style and class-size suggestions are advisory; use `vendor/bin/mago lint` to see them.
 The analyzer checks `src`; tests are linted and executed with swew/test.
-Test output omits the logo and per-test success messages, but the bundled test runner
-still draws its progress bar.
+Test output omits the logo and per-test success messages.
 
 ## Example of use
 
+### Create a command
 
-### Create command
 ```php
 <?php
 
+declare(strict_types=1);
+
 namespace My\Cli\Commands;
 
-use Swew\Cli\Command;
+use Swew\Cli\Args\Argument;
+use Swew\Cli\Args\CliCommand;
+use Swew\Cli\Args\CliCtx;
+use Swew\Cli\CommandCtx;
 
-class ShowTimeCommand extends Command {
-    const NAME = 'show:time {prefix}';
+#[CliCommand(name: 'show:time', desc: 'Show the current time.')]
+class ShowTimeCommand
+{
+    #[CliCtx]
+    private CommandCtx $ctx;
 
-    const DESCRIPTION = 'The function shows the current time.';
+    #[Argument(name: 'prefix', required: false)]
+    public string $prefix = '';
 
     public function __invoke(): int
     {
-        $prefix = $this->arg('prefix')->getValue();
-
-        $time = $prefix . ' ' . date('H:i:s');
-
-        $this->output->writeLn($time);
-
-        return self::SUCCESS;
+        $this->ctx->output->writeLn($this->prefix . ' ' . date('H:i:s'));
+        return 0;
     }
 }
 ```
 
-### Create cli-program
+### Register and run commands
 
-```php
-<?php
-
-namespace My\Cli;
-
-use Swew\Cli\SwewCommander;
-use My\Cli\Commands\ShowTimeCommand;
-
-class MySuperCli extends SwewCommander
-{
-    protected array $commands = [
-        ShowTimeCommand::class,
-    ];
-}
-```
-
-### Run cli-program
 ```php
 <?php
 // index.php
 
-require __DIR__.'/vendor/autoload.php';
+declare(strict_types=1);
 
-use My\Cli\MySuperCli;
+require __DIR__ . '/vendor/autoload.php';
+
+use My\Cli\Commands\ShowTimeCommand;
+use Swew\Cli\SwewCommander;
+
+class MySuperCli extends SwewCommander
+{
+    protected array $commands = [ShowTimeCommand::class];
+}
 
 (new MySuperCli($argv))->run();
 ```
+
 ```sh
-php index.php show:time at
+php index.php show:time --prefix at
+php index.php show:time --help
 ```
 
-# API / DOC
+## Command API
 
-# Console — User Commands
+Commands are ordinary classes with exactly one `#[CliCommand(name: ..., desc: ...)]`
+and a public, parameterless `__invoke(): int`. No base class or interface is needed.
+Return `0` for success or a nonzero exit code for failure. Constructors cannot
+require arguments. Injection happens **after construction**, before invocation;
+use injected properties in `__invoke()`, not in the constructor.
 
-> An example of creating a command with SWEW-CLI.
+`#[Argument]` and `#[CliCtx]` work on public, protected, and private mutable instance
+properties. Static and readonly properties cannot be injection targets.
+Command declarations are validated at registration. Help reads metadata only:
+it neither constructs commands nor validates required input.
 
-The command must be inherited from the `Swew\Cli\Command` class and the class must be callable via the `__invoke` method.
-
-The class must also have two obligatory constants.
-- `NAME` - necessary to call the command, it can also contain arguments.
-- The `DESCRIPTION` is a description of the command and is used to call the `help` message.
-
-As a result of the execution of the command should return the result - the status code. If all was successful, it is `0`.
+### Arguments and options
 
 ```php
-class SendEmail extends Command
-{
-    const NAME = 'send:email';
+use Swew\Cli\Args\Argument;
+use Swew\Cli\Command\ArgType;
 
-    const DESCRIPTION = 'Command to send email';
+// A required named option: --email user@example.com
+#[Argument]
+public string $email;
 
-    public function __invoke(): int
-    {
-        // ...
-        return self::SUCCESS;
-    }
-}
+// Optional, inferred from the property default: --count 2 or -c=2
+#[Argument(aliases: ['c'], desc: 'Number of messages')]
+public int $count = 1;
+
+// A flag: --quiet, --quiet=true, --quiet=false, --quiet=1, --quiet=0
+#[Argument]
+public bool $quiet = false;
+
+// Optional nullable value; nullable alone does not initialize a property.
+#[Argument]
+public ?string $label = null;
+
+// A positional argument
+#[Argument(position: 0)]
+public string $file;
+
+// Repeated named option: --id=1 --id=2
+#[Argument(name: 'id', itemType: ArgType::Int)]
+public array $ids = [];
+
+// A final positional array consumes all remaining positional values.
+#[Argument(position: 1, itemType: ArgType::Str)]
+public array $otherFiles = [];
 ```
 
-By inheriting from the class `Command` - we also get auxiliary methods defined in it.
+- Names default to property names. Specify names and aliases **without dashes**.
+- Scalar types come from PHP properties: `string`, `int`, `float`, `bool`,
+  including nullable forms. Other types and unions are rejected.
+- Arrays require `itemType: ArgType::Str|Int|Float|Bool`. Supplied values replace,
+  rather than append to, the property default. Repeated scalar options use the last value.
+- Without an initializer, an argument is required. Explicit `required: true`
+  requires supplied input even with a default. `required: false` requires an
+  initializer, including `= null` when appropriate.
+- Positional indexes must be consecutive from zero; a positional array must be last.
+  Positional arguments cannot have aliases.
+- Invalid values and missing option values produce one error and exit code `1`,
+  without invoking the command. Optional does not mean a supplied option may lack a value.
+- Integer input must pass PHP's decimal integer validation; floats must be finite.
+  Boolean values accept only `true`, `false`, `1`, and `0`.
+- `--name=value`, `--name value`, aliases, negative numeric values, and the
+  `--` end-of-options marker are supported. Use `--name=-text` for dash-prefixed strings.
+- Undeclared options and extra positional values are not rejected. Raw input remains
+  accessible through the context, preserving applications that share input across commands.
+- `help`, `-h`, `-help`, and `--help` request help before `--`. Declared options
+  take precedence (for example, a host alias `-h`); consumed option values do not trigger help.
 
-- `init(): void` - will be run before execution (can be overridden)
-- `arg(string $key): `CommandArgument` - getting the argument passed to the command
-- `argv(string $key): mixed` - get value
-- `getHelpMessage(): string` - get help message for the command (can be overridden)
-- `isValid(): bool` - check if all required arguments are passed to the command correctly
-- `getErrorMessage():string` - Get an error message
-- `call(string $command, array $args = []): int` - call another command with its own argument list and return its exit code
-
-Pass arguments without the command name: `$this->call('show:time', ['at'])`.
-An empty list does not inherit the outer command's arguments. `getArgs()` returns
-that command's name followed by its own arguments. Commands must be constructible
-without required constructor arguments; use `init()` for setup.
-
-# Working with command parameters, description of arguments
+### Runtime context
 
 ```php
-// Only command name, no arguments
-const NAME = 'send:email';
-
-// One required argument userId, the argument is always wrapped in curly braces
-const NAME = 'send:email {--userId}';
-
-// Optional argument userId is empty string
-const NAME = 'send:email {--userId=}';
-// Optional argument with default value is string
-const NAME = 'send:email {--userId=1}';
-// Optional argument, userId as array
-const NAME = 'send:email {--userId=[]}';
-
-/** Typing */
-// Argument with typing
-const NAME = 'send:email {--userId (int)}';
-
-// Argument with typing
-const NAME = 'send:email {--userId (float)}';
-
-// Argument with typing, default userId === 0
-const NAME = 'send:email {--userId= (int)}';
-
-// Argument with typing, default userId === ''
-const NAME = 'send:email {--userId= (str)}';
-
-// Argument with typing, default userId === false
-const NAME = 'send:email {--userId= (bool)}';
-
-// Argument with typing, default:     userId === false
-// if command: `send:email`           userId === true
-// if command: `send:email --userId`  userId === true
-const NAME = 'send:email {--userId= (bool)}';
-
-// Alias for argument
-const NAME = 'send:email {-S|--silent}';
-
-/** Description */
-const NAME = 'send:email {mail : The description, will be reflected in help}';
-
-/** Example command with one argument in the full description */
-const NAME = 'send:email {--count|-C=1          (int) : Count of mails}';
-          // command | argument|alias|default | type | description
+$this->ctx->output->writeLn('Hello');
+$this->ctx->arg('prefix')->getValue();
+$this->ctx->argv('prefix'); // Same value; aliases also work.
+$this->ctx->getArgs();     // Command name followed by its own raw arguments.
+$this->ctx->getCommander();
+$status = $this->ctx->call('show:time', ['--prefix', 'at']);
 ```
+
+Context values are immutable snapshots of resolved input, including defaults.
+Changing a command property does not change its context. Each call creates a fresh
+command and context; nested calls share output but never inherit outer arguments.
+`call()` accepts a registered command name or class name, returns its status, and
+never exits the process. `run()` retains its existing process-exit behavior; pass
+`stopByStatus: false` to the commander when embedding it.
+
+### Migrating from v1
+
+This is a breaking v2 API, with no legacy adapter.
+
+| v1 | v2 |
+|---|---|
+| `extends Command`, `NAME`, `DESCRIPTION` | Plain class with `#[CliCommand]` |
+| `{--count=1 (int)}` declarations | `#[Argument] public int $count = 1;` |
+| `$this->output`, `arg()`, `argv()`, `call()`, `getArgs()`, `getCommander()` | Access through an injected `CommandCtx` |
+| `self::SUCCESS`, `self::ERROR` | `0`, `1` (or your own constants) |
+| Command `init()` | Move input-dependent setup into `__invoke()` |
+| Command `getHelpMessage($template)` | `$commander->getCommandHelpMessage($nameOrClass, $template)` |
+| `isValid()`, `getErrorMessage()`, argument setters | Input validation is performed before invocation |
+| `fillCommandArguments()` | Removed; use `call()` to execute prepared commands |
+
+Commander subclasses keep `init()`, `showHelp()`, and `getHelpMessage()`.
+Their protected `getCommand($name, $args = [])` now returns a prepared
+`Closure(): int`, not a `Command` object. It no longer implicitly inherits input.
+Subclasses implementing pipelines can explicitly pass the protected `$argList`
+to `call()`. Command help templates support `{name}`, `{desc}`, `{usage}`, and `{options}`.
 
 ---
 
@@ -201,33 +218,33 @@ const NAME = 'send:email {--count|-C=1          (int) : Count of mails}';
 ![write demo](assets/write-img.avif)
 
 ```php
-$this->output->write('Hello ');
-$this->output->write('world', '<b>%s <br></>'); // formatting
+$this->ctx->output->write('Hello ');
+$this->ctx->output->write('world', '<b>%s <br></>'); // formatting
 
-$this->output->writeLn('Hello'); // write with new line
-$this->output->writeLn('world', '<b>%s <br></>');
+$this->ctx->output->writeLn('Hello'); // write with new line
+$this->ctx->output->writeLn('world', '<b>%s <br></>');
 
-$this->output->info('Some good news');
-$this->output->warn('A little attention');
-$this->output->error('Something has gone wrong');
+$this->ctx->output->info('Some good news');
+$this->ctx->output->warn('A little attention');
+$this->ctx->output->error('Something has gone wrong');
 
-$this->output->clear(); // Reset terminal window
+$this->ctx->output->clear(); // Reset terminal window
 ```
 
 ## Width / Height
 ```php
-$this->output->width();
-$this->output->height();
+$this->ctx->output->width();
+$this->ctx->output->height();
 ```
 
 ## Formatting
 
 ```php
-$this->output->write('<b><black><bgRed>Hello world</>');
+$this->ctx->output->write('<b><black><bgRed>Hello world</>');
 
 // OR
 $format = '<b><black><bgRed>%s</>';
-$this->output->write('Hello world', $format);
+$this->ctx->output->write('Hello world', $format);
 ```
 
 ### Symbols
@@ -268,7 +285,7 @@ animations and screen clearing are skipped when ANSI is disabled. You can overri
 this with `setAnsi(true)` or disable it explicitly:
 
 ```php
-$this->output->setAnsi(false);
+$this->ctx->output->setAnsi(false);
 ```
 
 ## Clear bash colors
@@ -276,20 +293,20 @@ $this->output->setAnsi(false);
 Remove bash color symbols from string
 
 ```php
-$this->output->clearColor($text); // no color string
+$this->ctx->output->clearColor($text); // no color string
 ```
 
 ## Empty lines
 ```php
 // Write a single blank line...
-$this->output->newLine(); 
+$this->ctx->output->newLine(); 
 // Write three blank lines...
-$this->output->newLine(3);
+$this->ctx->output->newLine(3);
 ```
 
 ## Link
 ```php
-$this->output->getLink($url, $text);
+$this->ctx->output->getLink($url, $text);
 ```
 
 # Prompting For Input
@@ -297,18 +314,18 @@ $this->output->getLink($url, $text);
 ## ask
 ```php
 public function __invoke(): int {
-	$name = $this->output->ask('What is your name?');
+	$name = $this->ctx->output->ask('What is your name?');
 	// ...
-	return self::SUCCESS;
+	return 0;
 }
 ```
 
 ## askYesNo
 ```php
 public function __invoke(): int {
-	$name = $this->output->askYesNo('Is this the best CLI utility?', true);
+	$name = $this->ctx->output->askYesNo('Is this the best CLI utility?', true);
 	// ...
-	return self::SUCCESS;
+	return 0;
 }
 ```
 ![askYesNo](assets/askYesNo.avif)
@@ -317,9 +334,9 @@ public function __invoke(): int {
 ## secret
 ```php
 public function __invoke(): int {
-	$password = $this->output->secret('What is the password?');
+	$password = $this->ctx->output->secret('What is the password?');
 	// ...
-	return self::SUCCESS;
+	return 0;
 }
 ```
 
@@ -332,16 +349,16 @@ public function __invoke(): int {
 ```php
 public function __invoke(): int {
 	/** @var string */
-	$answer = $this->output->choice(
+	$answer = $this->ctx->output->choice(
 		'What is your name?',
 		['Leo', 'Mike', 'Don', 'Raph'],
 		$isRequired = true // optional
 	);
 
-    $this->output->writeLn($answer);
+    $this->ctx->output->writeLn($answer);
 
 	// ...
-	return self::SUCCESS;
+	return 0;
 }
 ```
 
@@ -352,7 +369,7 @@ public function __invoke(): int {
 ```php
 public function __invoke(): int {
 	/** @var array */
-	$answer = $this->output->select(
+	$answer = $this->ctx->output->select(
 		'What is your name?',
 		['Leo', 'Mike', 'Don', 'Raph'],
 		$selectedIndex = [], // optional
@@ -361,7 +378,7 @@ public function __invoke(): int {
 	);
 
 	// ...
-	return self::SUCCESS;
+	return 0;
 }
 ```
 
@@ -379,7 +396,7 @@ $list = [
 	['Raphael', 21.5, 'Saii'],
 ];
 
-$this->output->table($title, $list);
+$this->ctx->output->table($title, $list);
 ```
 
 ## Progress bar
@@ -387,7 +404,7 @@ $this->output->table($title, $list);
 ![Progress bar](assets/progress-bar.avif)
 
 ```php
-$bar = $this->output->createProgressBar(count($users)); 
+$bar = $this->ctx->output->createProgressBar(count($users)); 
 
 $bar->start(); // show progress bar
 

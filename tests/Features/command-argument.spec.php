@@ -2,245 +2,152 @@
 
 declare(strict_types=1);
 
-use Swew\Cli\Command\CommandArgument;
+use Swew\Cli\Args\Argument;
+use Swew\Cli\Args\CliCommand;
+use Swew\Cli\Args\CliCtx;
+use Swew\Cli\Command\ArgumentDefinition;
 use Swew\Cli\Command\ArgType;
+use Swew\Cli\Command\CommandDefinition;
+use Swew\Cli\CommandCtx;
+use Swew\Cli\SwewCommander;
+use Swew\Cli\Testing\TestHelper;
 
-//*
-it('CommandArgument isArgument=true', function () {
-    $str = '--count|-C=1 (int) : Count of mails 1';
-    $arg = new CommandArgument($str);
+it('invalid argument declarations fail during registration', function () {
+    $properties = new class {
+        #[Argument(required: false)]
+        public string $missingDefault;
 
-    expect($arg->isArgument())->toBe(true);
+        #[Argument]
+        public string|int $union;
+
+        #[Argument]
+        public static string $static;
+
+        #[Argument]
+        public readonly int $readonly;
+
+        #[Argument]
+        public array $missingItemType = [];
+
+        #[Argument(itemType: ArgType::Int)]
+        public array $wrongDefault = ['1'];
+
+        #[Argument]
+        public $untyped;
+
+        #[Argument(position: -1)]
+        public string $negative;
+
+        #[Argument(name: '--name')]
+        public string $invalidName;
+    };
+    foreach ((new ReflectionClass($properties))->getProperties() as $property) {
+        $attribute = $property->getAttributes(Argument::class)[0]->newInstance();
+        expect(fn() => new ArgumentDefinition($property, $attribute))->toThrow(LogicException::class);
+    }
 });
 
-it('CommandArgument isArgument=false', function () {
-    $str = 'count (int) : Count of mails 2';
-    $arg = new CommandArgument($str);
+it('invalid command declarations and duplicate command names are rejected', function () {
+    $classes = [
+        new class {
+            public function __invoke(): int
+            {
+                return 0;
+            }
+        },
+        new
+            #[CliCommand('bad-invoke')]
+            class {
+                public function __invoke(): void
+                {
+                }
+            },
+        new
+            #[CliCommand('bad-alias')]
+            class {
+                #[Argument(aliases: ['n'])]
+                public int $count = 0;
+                #[Argument]
+                public string $n = '';
 
-    expect($arg->isArgument())->toBe(false);
+                public function __invoke(): int
+                {
+                    return 0;
+                }
+            },
+        new
+            #[CliCommand('bad-context')]
+            class {
+                #[CliCtx]
+                private string $ctx;
+
+                public function __invoke(): int
+                {
+                    return 0;
+                }
+            },
+        new
+            #[CliCommand('bad-position')]
+            class {
+                #[Argument(position: 1)]
+                public string $value;
+
+                public function __invoke(): int
+                {
+                    return 0;
+                }
+            },
+    ];
+    foreach ($classes as $class) {
+        expect(fn() => new CommandDefinition($class::class))->toThrow(LogicException::class);
+    }
+
+    $valid = new
+        #[CliCommand('duplicate')]
+        class {
+            public function __invoke(): int
+            {
+                return 0;
+            }
+        };
+    $cli = new class(['script.php'], TestHelper::createOutput(), false) extends SwewCommander {
+        public function register(array $classes): void
+        {
+            $this->setCommands($classes);
+        }
+    };
+    expect(fn() => $cli->register([$valid::class, $valid::class]))->toThrow(LogicException::class);
 });
 
-it('CommandArgument getDescription 1', function () {
-    $str = '--count|-C=1 (int) : Count of mails: 3';
-    $arg = new CommandArgument($str);
+it('private properties, required overrides and variadic positionals are supported', function () {
+    $fixture = new
+        #[CliCommand('files')]
+        class {
+            #[CliCtx]
+            private CommandCtx $ctx;
 
-    expect($arg->getDescription())->toBe('Count of mails: 3');
+            #[Argument(required: true)]
+            private string $prefix = 'default';
+
+            #[Argument(position: 0, itemType: ArgType::Str)]
+            private array $files = [];
+
+            public function __invoke(): int
+            {
+                $this->ctx->output->write(json_encode([$this->prefix, $this->files], JSON_THROW_ON_ERROR));
+                return 0;
+            }
+        };
+    $helper = new TestHelper();
+    $cli = new class(['script.php'], $helper->getOutput(), false) extends SwewCommander {
+        public function register(string $class): void
+        {
+            $this->setCommands([$class]);
+        }
+    };
+    $cli->register($fixture::class);
+    expect($cli->call('files'))->toBe(1);
+    $helper->clearOutput();
+    expect($cli->call('files', ['a', '--prefix=', 'b', '--', '-c']))->toBe(0);
+    expect($helper->getOutputContentAndClear())->toBe('["",["a","b","-c"]]');
 });
-
-it('CommandArgument getDescription 2', function () {
-    $str = '--count|-C=1 (int)';
-    $arg = new CommandArgument($str);
-
-    expect($arg->getDescription())->toBe('');
-});
-// */
-//*
-it('CommandArgument getType 1', function () {
-    $str = '--count|-C=1 (int) : Count of mails: 3';
-    $arg = new CommandArgument($str);
-
-    expect($arg->getType())->toBe(ArgType::Int);
-});
-
-it('CommandArgument getType 2', function () {
-    $str = '--count';
-    $arg = new CommandArgument($str);
-
-    expect($arg->getType())->toBe(ArgType::Str);
-});
-// */
-
-//*
-it('CommandArgument getValue 1', function () {
-    $str = '--count|-C= (int) : Count of mails: 3';
-    $arg = new CommandArgument($str);
-
-    expect($arg->getValue())->toBe(0);
-});
-
-it('CommandArgument getValue 2', function () {
-    $str = '--count|-C (int) : Count of mails: 3';
-    $arg = new CommandArgument($str);
-
-    expect($arg->getValue())->toBe(0);
-});
-
-it('CommandArgument getValue 3', function () {
-    $str = '--count|-C=3 (int) : Count of mails: 3';
-    $arg = new CommandArgument($str);
-
-    expect($arg->getValue())->toBe(3);
-});
-//*/
-
-//*
-it('CommandArgument isRequired 1', function () {
-    $str = '--count|-C= (int) : Count of mails: 3';
-    $arg = new CommandArgument($str);
-
-    expect($arg->isRequired())->toBe(false);
-});
-
-it('CommandArgument isRequired 2', function () {
-    $str = '--count';
-    $arg = new CommandArgument($str);
-
-    expect($arg->isRequired())->toBe(true);
-});
-// */
-
-//*
-it('CommandArgument is 1', function () {
-    $str = '--count|-C=123 (int) : Description';
-    $arg = new CommandArgument($str);
-
-    expect($arg->is('count'))->toBe(true);
-    expect($arg->is('C'))->toBe(true);
-    expect($arg->is('other'))->toBe(false);
-});
-
-it('CommandArgument is 2', function () {
-    $str = '--count|-C (int):Description';
-    $arg = new CommandArgument($str);
-
-    expect($arg->is('count'))->toBe(true);
-    expect($arg->is('C'))->toBe(true);
-    expect($arg->is('other'))->toBe(false);
-});
-
-it('CommandArgument is 3', function () {
-    $str = '--count|-C';
-    $arg = new CommandArgument($str);
-
-    expect($arg->is('count'))->toBe(true);
-    expect($arg->is('C'))->toBe(true);
-    expect($arg->is('other'))->toBe(false);
-});
-
-it('CommandArgument is 4', function () {
-    $str = '--count|-C : Desc';
-    $arg = new CommandArgument($str);
-
-    expect($arg->is('count'))->toBe(true);
-    expect($arg->is('C'))->toBe(true);
-    expect($arg->is('other'))->toBe(false);
-});
-// */
-
-//*
-it('CommandArgument isArray 1', function () {
-    $str = '--id=[] : Desc';
-    $arg = new CommandArgument($str);
-
-    expect($arg->isArray())->toBe(true);
-});
-
-it('CommandArgument isArray 2', function () {
-    $str = '--id=';
-    $arg = new CommandArgument($str);
-
-    expect($arg->isArray())->toBe(false);
-});
-
-it('CommandArgument isArray 3', function () {
-    $str = '--id ';
-    $arg = new CommandArgument($str);
-
-    expect($arg->isArray())->toBe(false);
-});
-// */
-
-it('array arguments default to an empty array and append every value', function () {
-    $arg = new CommandArgument('--id=[] (int)');
-    expect($arg->getValue())->toBe([]);
-    $arg->setValue([1, 2]);
-    $arg->setValue([3, 4]);
-    expect($arg->getValue())->toBe([1, 2, 3, 4]);
-});
-
-it('missing option values do not consume flags and reparsing clears old values', function () {
-    $arg = new CommandArgument('--id');
-    $arg->parseInput(['--id', '--silent']);
-    expect($arg->isValid())->toBe(false);
-    $arg->parseInput(['--id', '-12']);
-    expect($arg->getValue())->toBe('-12');
-    $arg->parseInput([]);
-    expect($arg->isValid())->toBe(false);
-    $arg->parseInput(['--', '--id=123']);
-    expect($arg->isValid())->toBe(false);
-});
-
-//*
-it('CommandArgument parseInput 1.1', function () {
-    $str = 'id';
-    $arg = new CommandArgument($str);
-
-    $arg->parseInput(['123']);
-
-    expect($arg->getValue())->toBe('123');
-});
-
-it('CommandArgument parseInput 1.2', function () {
-    $str = '--id';
-    $arg = new CommandArgument($str);
-
-    $arg->parseInput(['some text', '--id', '123', '-c=2']);
-
-    expect($arg->getValue())->toBe('123');
-});
-
-it('CommandArgument parseInput 1.3', function () {
-    $str = '--id (float)';
-    $arg = new CommandArgument($str);
-
-    $arg->parseInput(['some text', '--id', '1.23', '-c=2']);
-
-    expect($arg->getValue())->toBe(1.23);
-});
-
-it('CommandArgument parseInput 2.1', function () {
-    $str = 'id=[]';
-    $arg = new CommandArgument($str);
-
-    $arg->parseInput(['456']);
-
-    expect($arg->getValue())->toBe(['456']);
-});
-
-it('CommandArgument parseInput 2.2', function () {
-    $str = '-id=[]';
-    $arg = new CommandArgument($str);
-
-    $arg->parseInput(['-id', '456']);
-
-    expect($arg->getValue())->toBe(['456']);
-});
-
-it('CommandArgument parseInput 3.1', function () {
-    $str = '-s (bool)';
-    $arg = new CommandArgument($str);
-
-    $arg->parseInput(['--id', '123', '-s']);
-
-    expect($arg->getValue())->toBe(true);
-});
-
-it('CommandArgument parseInput 3.2', function () {
-    $str = '-s (bool)';
-    $arg = new CommandArgument($str);
-
-    $arg->parseInput(['--id', '123']);
-
-    expect($arg->getValue())->toBe(false);
-});
-
-it('CommandArgument parseInput 4.1', function () {
-    $str = '-ls=[] (bool)';
-    $arg = new CommandArgument($str);
-
-    $arg->parseInput(['--ls']);
-
-    expect($arg->getValue())->toBe([true]);
-});
-
-// */
