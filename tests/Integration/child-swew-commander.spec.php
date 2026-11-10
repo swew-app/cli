@@ -14,9 +14,9 @@ it('SwewCommander help', function () {
 
     (new DemoCli($argv, $output, false))->run();
 
-    $msg = "Available commands:
+    $msg = 'Available commands:
  show:time: The function shows the current time.
-";
+';
 
     expect($helper->getOutputContentAndClear())->toBe($msg);
 });
@@ -28,7 +28,7 @@ it('SwewCommander command help', function () {
 
     (new DemoCli($argv, $output, false))->run();
 
-    $msg = "Description:
+    $msg = 'Description:
  The function shows the current time.
 
 Usage:
@@ -36,7 +36,7 @@ Usage:
 
 Options:
  prefix
-";
+';
 
     expect($helper->getOutputContentAndClear())->toBe($msg);
 });
@@ -60,7 +60,7 @@ it('SwewCommander command GOOD', function () {
 
     (new DemoCli($argv, $output, false))->run();
 
-    $msg = "A_A 2023-05-03 06:35";
+    $msg = 'A_A 2023-05-03 06:35';
 
     expect($helper->getOutputContentAndClear())->toBe($msg);
 });

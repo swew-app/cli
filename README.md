@@ -20,6 +20,24 @@ The package is a PHP library for building console applications and commands in a
 composer require swew/cli
 ```
 
+## Development
+
+Requires PHP 8.3+. Run `composer install`, then:
+
+- `composer test` — tests (or `composer test -- 'output\.spec\.php$'`).
+- `composer static` — Mago static analysis.
+- `composer lint` — correctness-focused lint checks.
+- `composer code-check` — check formatting without changing files.
+- `composer format` — apply formatting.
+- `composer check` — all of the above checks, including tests.
+
+Mago replaces Psalm, PHPStan, and Pint; Composer uses the pinned local binary.
+Its first run downloads the platform binary, so it needs network access.
+Style and class-size suggestions are advisory; use `vendor/bin/mago lint` to see them.
+The analyzer checks `src`; tests are linted and executed with swew/test.
+Test output omits the logo and per-test success messages, but the bundled test runner
+still draws its progress bar.
+
 ## Example of use
 
 
@@ -79,7 +97,7 @@ use My\Cli\MySuperCli;
 (new MySuperCli($argv))->run();
 ```
 ```sh
-php index.php 'show:time at'
+php index.php show:time at
 ```
 
 # API / DOC
@@ -119,7 +137,12 @@ By inheriting from the class `Command` - we also get auxiliary methods defined i
 - `getHelpMessage(): string` - get help message for the command (can be overridden)
 - `isValid(): bool` - check if all required arguments are passed to the command correctly
 - `getErrorMessage():string` - Get an error message
-- `call(string $command, ?array $args:) int` - call another command
+- `call(string $command, array $args = []): int` - call another command with its own argument list and return its exit code
+
+Pass arguments without the command name: `$this->call('show:time', ['at'])`.
+An empty list does not inherit the outer command's arguments. `getArgs()` returns
+that command's name followed by its own arguments. Commands must be constructible
+without required constructor arguments; use `init()` for setup.
 
 # Working with command parameters, description of arguments
 
@@ -240,7 +263,9 @@ $this->output->write('Hello world', $format);
 
 ## Without formatting
 
-If you do not want to use formatting, specify this
+Redirected output and `NO_COLOR` disable ANSI formatting automatically. Progress
+animations and screen clearing are skipped when ANSI is disabled. You can override
+this with `setAnsi(true)` or disable it explicitly:
 
 ```php
 $this->output->setAnsi(false);

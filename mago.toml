@@ -1,0 +1,35 @@
+version = "1.59.0"
+php-version = "8.3"
+
+[source]
+paths = ["src", "tests"]
+includes = ["vendor"]
+
+[analyzer]
+excludes = ["tests"]
+# Mixed values are intentional at I/O boundaries; commands must have no required constructor arguments.
+ignore = [
+    { code = "mixed-assignment", in = ["src/Terminal/Output.php"] },
+    { code = "unsafe-instantiation", in = ["src/SwewCommander.php"] },
+]
+
+[linter.rules]
+disallowed-functions = { level = "error", functions = ["shell_exec"] }
+# Style preferences and size metrics should not force extra classes or files.
+cyclomatic-complexity = { level = "note" }
+kan-defect = { level = "note" }
+halstead = { level = "note" }
+too-many-methods = { level = "note" }
+literal-named-argument = { level = "note" }
+no-empty = { level = "note" }
+no-isset = { level = "note" }
+no-shorthand-ternary = { level = "note" }
+prefer-first-class-callable = { level = "note" }
+file-name = { level = "note" }
+single-class-per-file = { level = "note" }
+tagged-todo = { level = "note" }
+
+[formatter]
+preset = "psr-12"
+trailing-comma = true
+space-within-grouping-parenthesis = false

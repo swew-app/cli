@@ -11,33 +11,28 @@ $arg = new CommandArgument('send:mail {mail} {-name=} {-id=}');
 
 // $arg->parseInput(array_slice($argv, 1));
 
-
 $output = new Output();
 $output->writeLn("\n\n");
 
-
 /*
-$bar = $output->createProgressBar(5);
-$bar->start(); // show progress bar
-
-foreach ([1,2] as $user) {
-    sleep(1);
-    $bar->increment(); // progress
-}
-
-$bar->finish(); // remove progressbar
-$output->writeLn("\n\n");
-//*/
-
+ * $bar = $output->createProgressBar(5);
+ * $bar->start(); // show progress bar
+ *
+ * foreach ([1,2] as $user) {
+ * sleep(1);
+ * $bar->increment(); // progress
+ * }
+ *
+ * $bar->finish(); // remove progressbar
+ * $output->writeLn("\n\n");
+ * //*/
 
 // $link = $output->getLink('https://swew.app', 'SWEW Site');
 // $output->writeLn($link);
 
-
-
 // /*
 for ($i = 0; $i <= 255; $i++) {
-    if ($i > 0 && $i % 8 === 0) {
+    if ($i > 0 && ($i % 8) === 0) {
         $output->newLine();
     }
     $title = str_pad("  $i", 7, ' ');
@@ -74,7 +69,6 @@ $list = [
 
 // $output->writeLn($answer, '<red>%s</>');
 
-
 // $output->setAnsi(false);
 
 // $output->writeLn('New Ln');
@@ -85,29 +79,27 @@ $list = [
 // $output->writeLn('<s> highlight </>');
 
 /*
-$answer = $output->ask('How are you?');
-$output->writeLn($answer, '<red>%s</>');
-// */
+ $answer = $output->ask('How are you?');
+ $output->writeLn($answer, '<red>%s</>');
+ // */
 
 // /*
-$output->table(
-    ['Name', 'Age', 'Weapon'],
-    [
-['Leo', 22, 'Swords'],
-['Mike', 21.6, 'Nunchaks'],
-['Don', 21.9, 'Bo'],
-['Raphael', 21.5, 'Saii'],
-],
-);
+$output->table(['Name', 'Age', 'Weapon'], [
+    ['Leo',     22,   'Swords'],
+    ['Mike',    21.6, 'Nunchaks'],
+    ['Don',     21.9, 'Bo'],
+    ['Raphael', 21.5, 'Saii'],
+]);
+
 // */
 
 /*
-$total = 259;
-$bar = $output->createProgressBar($total);
-$bar->start();
-for ($i = 0; $i <= $total; $i++) {
-$bar->increment();
-usleep(10000);
-}
-$bar->finish();
-// */
+ * $total = 259;
+ * $bar = $output->createProgressBar($total);
+ * $bar->start();
+ * for ($i = 0; $i <= $total; $i++) {
+ * $bar->increment();
+ * usleep(10000);
+ * }
+ * $bar->finish();
+ * // */

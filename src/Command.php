@@ -19,10 +19,10 @@ abstract class Command
 
     public const ERROR = 1;
 
-    protected SwewCommander|null $commander = null;
+    protected ?SwewCommander $commander = null;
 
     /** @var Output */
-    protected Output|null $output = null;
+    protected ?Output $output = null;
 
     /** @var CommandArgument[] */
     private array $commandArguments = [];
@@ -41,6 +41,7 @@ abstract class Command
         $this->output = $output;
     }
 
+    /** @param list<string> $args */
     final public function setArgs(array $args): void
     {
         $this->args = $args;
@@ -68,11 +69,7 @@ abstract class Command
     {
         foreach ($this->commandArguments as $argument) {
             if (!$argument->isValid()) {
-                return sprintf(
-                    "Get error for command '<b>%s</>': %s",
-                    $this->getName(),
-                    $argument->getErrorMessage()
-                );
+                return sprintf("Get error for command '<b>%s</>': %s", $this->getName(), $argument->getErrorMessage());
             }
         }
 
@@ -92,13 +89,7 @@ abstract class Command
 
     final public function getName(): string
     {
-        $name = static::NAME;
-        $name = str_replace("\n", ' ', $name);
-
-        if (is_string(($name))) {
-            return strtok($name, ' ') ?: $name;
-        }
-        return '';
+        return preg_split('/\s+/', trim(static::NAME), 2)[0] ?? '';
     }
 
     /**
@@ -107,9 +98,10 @@ abstract class Command
     public function getHelpMessage(string $messageTemplate = ''): string
     {
         if ($messageTemplate === '') {
-            $messageTemplate = "<yellow>Description:</>\n {desc}\n\n".
-                "<yellow>Usage:</>\n {name} [options]\n\n".
-                "Options:\n{options}";
+            $messageTemplate =
+                "<yellow>Description:</>\n {desc}\n\n"
+                . "<yellow>Usage:</>\n {name} [options]\n\n"
+                . "Options:\n{options}";
         }
 
         $options = [];
@@ -122,17 +114,17 @@ abstract class Command
         }
 
         $formattedOptions = array_map(
-            fn (string $name, string $desc) => $desc
+            fn(string $name, string $desc) => $desc
                 ? sprintf(' <green>%s</>%s', str_pad($name, $maxLength + 2, ' '), $desc)
                 : sprintf(' <green>%s</>', $name),
             array_keys($options),
-            array_values($options)
+            array_values($options),
         );
 
         return str_replace(
             ['{desc}', '{name}', '{options}'],
             [static::DESCRIPTION, $this->getName(), implode("\n", $formattedOptions)],
-            $messageTemplate
+            $messageTemplate,
         );
     }
 
@@ -153,17 +145,17 @@ abstract class Command
     }
 
     /**
+     * @param list<string> $args
      * @throws Exception
      */
-    final public function call(string $commandName, array $args = []): void
+    final public function call(string $commandName, array $args = []): int
     {
-        $this->getCommander()->call($commandName);
+        return $this->getCommander()->call($commandName, $args);
     }
 
     final public function callSilent(): void
     {
         // TODO
-
     }
 
     final public function getCommander(): SwewCommander

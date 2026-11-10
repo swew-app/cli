@@ -21,20 +21,22 @@ class ProgressBar
 
     public function finish(): void
     {
-        $this->output->write("\e[2K\r");
+        if ($this->output->isAnsi()) {
+            $this->output->write("\r<eraseLine>");
+        }
     }
 
     public function increment(): void
     {
         $this->index++;
-
-        $progress = intval($this->index / $this->total) * 100;
-
-        if ($progress > 100) {
-            $progress = 100;
+        if (!$this->output->isAnsi()) {
+            return;
         }
 
-        $line = "\r <green>" . str_repeat('▓', intval($progress / 2)) . '</>' . str_repeat('░', 50 - intval($progress / 2)) . " $progress%";
+        $progress = $this->total > 0 ? min(100, (int) (($this->index / $this->total) * 100)) : 100;
+        $filled = max(0, min(50, (int) ($progress / 2)));
+
+        $line = "\r <green>" . str_repeat('▓', $filled) . '</>' . str_repeat('░', max(0, 50 - $filled)) . " $progress%";
 
         $this->output->write($line);
     }

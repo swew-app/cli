@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__.DIRECTORY_SEPARATOR.'../../vendor/autoload.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . '../../vendor/autoload.php';
 require_once 'stubs/Commands/SendMailCommand.php';
 
 use Swew\Cli\SwewCommander;
@@ -12,11 +12,24 @@ class TestSwewCommander extends SwewCommander
 {
     protected array $commands = [
         \SendMailCommand::class,
+        CaptureCommand::class,
     ];
 
     public function __call(string $name, array $args): mixed
     {
         return $this->$name(...$args);
+    }
+}
+
+class CaptureCommand extends \Swew\Cli\Command
+{
+    public const NAME = "capture\n{--quiet= (bool)} {value=} {--count= (int)}";
+    public const DESCRIPTION = 'Capture arguments';
+
+    public function __invoke(): int
+    {
+        $this->output->write($this->argv('value'));
+        return 7;
     }
 }
 
@@ -41,7 +54,8 @@ it('SwewCommander :setCommands :getCommand', function () {
     [
         'SwewCommander' => $sc,
         'TestHelper' => $helper,
-    ] = testFactory($args);
+    ] =
+        testFactory($args);
 
     expect($helper->getOutputContentAndClear())->toBe('Email sended');
 });
@@ -52,9 +66,11 @@ it('SwewCommander :setCommands :getCommand - with error', function () {
     [
         'SwewCommander' => $sc,
         'TestHelper' => $helper,
-    ] = testFactory($args);
+    ] =
+        testFactory($args);
 
-    expect($helper->getOutputContentAndClear())->toBe(" ERROR  Get error for command 'send:mail': -silent,-S - is required\n");
+    expect($helper->getOutputContentAndClear())
+        ->toBe(" ERROR  Get error for command 'send:mail': -silent,-S - is required\n");
 });
 
 it('SwewCommander :isNeedHelp :showHelp - Commander', function () {
@@ -63,13 +79,15 @@ it('SwewCommander :isNeedHelp :showHelp - Commander', function () {
     [
         'SwewCommander' => $sc,
         'TestHelper' => $helper,
-    ] = testFactory($args);
+    ] =
+        testFactory($args);
 
     $msg = <<<'MSG'
-Available commands:
- send:mail: Command to send email
+        Available commands:
+         send:mail: Command to send email
+         capture: Capture arguments
 
-MSG;
+        MSG;
 
     expect($helper->getOutputContentAndClear())->toBe($msg);
 });
@@ -80,32 +98,69 @@ it('SwewCommander :isNeedHelp :showHelp - Command', function () {
     [
         'SwewCommander' => $sc,
         'TestHelper' => $helper,
-    ] = testFactory($args);
+    ] =
+        testFactory($args);
 
     $msg = <<<'MSG'
-Description:
- Command to send email
+        Description:
+         Command to send email
 
-Usage:
- send:mail [options]
+        Usage:
+         send:mail [options]
 
-Options:
- email
- -count      Count of mails
- -id         User ids
- -silent,-S  No log message
+        Options:
+         email
+         -count      Count of mails
+         -id         User ids
+         -silent,-S  No log message
 
-MSG;
+        MSG;
 
     expect($helper->getOutputContentAndClear())->toBe($msg);
 });
 
+it('nested calls forward arguments and status without inheriting outer arguments', function () {
+    $helper = new TestHelper();
+    $sc = new TestSwewCommander(['script.php', 'capture', 'outer'], $helper->getOutput(), false);
+    $inherited = $sc->getCommand('capture');
+    expect($inherited->getArgs())->toBe(['capture', 'outer']);
+    expect($inherited->argv('value'))->toBe('outer');
+    $command = $sc->getCommand('capture', ['inner']);
+    expect($command->getArgs())->toBe(['capture', 'inner']);
+    expect($command->call('capture', ['nested']))->toBe(7);
+    expect($helper->getOutputContentAndClear())->toBe('nested');
+    expect($command->call('capture'))->toBe(7);
+    expect($helper->getOutputContentAndClear())->toBe('');
+    $sc->run();
+    expect($helper->getOutputContentAndClear())->toBe('outer');
+});
 
+it('positional arguments work around options and after the end-of-options marker', function () {
+    $sc = new TestSwewCommander(['script.php'], TestHelper::createOutput(), false);
+    $command = $sc->getCommand('capture', ['--quiet', '--count', '2', 'value']);
+    expect($command->argv('value'))->toBe('value');
+    expect($command->argv('count'))->toBe(2);
+    $command = $sc->getCommand('capture', ['--', '--quiet']);
+    expect($command->argv('value'))->toBe('--quiet');
+    expect($command->argv('quiet'))->toBe(false);
+    $command = $sc->getCommand('capture', ['capture']);
+    expect($command->argv('value'))->toBe('capture');
+    $helper = new TestHelper();
+    (new TestSwewCommander(['script.php', 'capture', '--', '--help'], $helper->getOutput(), false))->run();
+    expect($helper->getOutputContentAndClear())->toBe('--help');
+});
+
+it('unknown commands report one error without an exception trace', function () {
+    $helper = new TestHelper();
+    (new TestSwewCommander(['script.php', 'missing'], $helper->getOutput(), false))->run();
+    expect($helper->getOutputContentAndClear())->toBe(" ERROR  Command 'missing' not found\n");
+});
 
 it('CommandArgument get all arguments', function () {
     $args = ['script.php', 'send:mail', 'user@mail.com', '--count', '1', 'test/file.spec.php'];
     [
         'SwewCommander' => $sc,
         'TestHelper' => $helper,
-    ] = testFactory($args);
+    ] =
+        testFactory($args);
 });

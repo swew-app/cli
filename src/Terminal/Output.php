@@ -6,21 +6,27 @@ namespace Swew\Cli\Terminal;
 
 class Output
 {
+    /** @var resource */
     private mixed $input;
+    /** @var resource */
     private mixed $output;
+    private readonly bool $ownsInput;
+    private readonly bool $ownsOutput;
     private bool $ansi = true;
-    private bool|null|string $sttyMode = null;
+    private bool|string|null $sttyMode = null;
     private readonly bool $useExec;
     private static array $formats = [];
 
     public function __construct(
         mixed $stdin = null,
         mixed $stdout = null,
-        bool $useExec = true
+        bool $useExec = true,
     ) {
         $this->useExec = $useExec;
+        $this->ownsInput = $stdin === null;
+        $this->ownsOutput = $stdout === null;
         $input = $stdin ?? fopen('php://stdin', 'r');
-        $output = $stdout ?? fopen('php://output', 'r');
+        $output = $stdout ?? fopen('php://output', 'w');
 
         if (!is_resource($output) || !is_resource($input)) {
             throw new \Exception("Wrong type for \$output:($output) or \$input:($input) stream");
@@ -28,26 +34,31 @@ class Output
 
         $this->input = $input;
         $this->output = $output;
-        if (stream_isatty($this->output)) {
+        $this->ansi =
+            stream_isatty($stdout === null && defined('STDOUT') ? STDOUT : $output) && getenv('NO_COLOR') === false;
+        if ($this->isInteractiveInput($this->input)) {
             $this->sttyMode = $this->exec('stty -g');
         }
     }
 
     public function __destruct()
     {
-        if (is_resource($this->input)) {
+        if (is_string($this->sttyMode)) {
+            $this->exec('stty ' . escapeshellarg(trim($this->sttyMode)));
+        }
+        if ($this->ownsInput && is_resource($this->input)) {
             fclose($this->input);
         }
-        if (is_resource($this->output)) {
+        if ($this->ownsOutput && is_resource($this->output)) {
             fclose($this->output);
-        }
-        if ($this->sttyMode && is_string($this->sttyMode)) {
-            $this->exec('stty ' . $this->sttyMode);
         }
     }
 
     public function clear(): void
     {
+        if (!$this->ansi) {
+            return;
+        }
         if (PHP_OS_FAMILY === 'Windows') {
             $this->write("\x1B[2J\x1B[0f");
         } else {
@@ -57,7 +68,7 @@ class Output
 
     public function getLink(string $url, string $text): string
     {
-        return "\e]8;;$url\a$text\e]8;;\a";
+        return $this->ansi ? "\e]8;;$url\x07$text\e]8;;\x07" : $text;
     }
 
     public function write(string|int|float $text, string $format = '%s'): void
@@ -74,19 +85,19 @@ class Output
         $this->write($text, $format . "\n");
     }
 
-    public function info(mixed $text): void
+    public function info(string|int|float $text): void
     {
         $format = '<bgGreen> INFO </> %s</>';
         $this->writeLn($text, $format);
     }
 
-    public function warn(mixed $text): void
+    public function warn(string|int|float $text): void
     {
         $format = '<bgYellow> WARN </> %s</>';
         $this->writeLn($text, $format);
     }
 
-    public function error(mixed $text): void
+    public function error(string|int|float $text): void
     {
         $format = '<bgRed> ERROR </> %s</>';
         $this->writeLn($text, $format);
@@ -94,7 +105,7 @@ class Output
 
     public function newLine(int $countLines = 1): void
     {
-        $nl = str_repeat("\n", $countLines);
+        $nl = str_repeat("\n", max(0, $countLines));
         $this->write($nl);
     }
 
@@ -110,10 +121,7 @@ class Output
 
         foreach ($data as $row) {
             foreach ($row as $columnIndex => $value) {
-                $columnWidths[$columnIndex] = max(
-                    strlen(strval($value)) + 1,
-                    $columnWidths[$columnIndex] ?? 0
-                );
+                $columnWidths[$columnIndex] = max(strlen(strval($value)) + 1, $columnWidths[$columnIndex] ?? 0);
             }
         }
 
@@ -130,7 +138,7 @@ class Output
             foreach ($row as $columnIndex => $value) {
                 $line .= sprintf("%-{$columnWidths[$columnIndex]}s ", " $value");
             }
-            $format = $i % 2 === 0 ? '<blue>%s</>' : '<white>%s</>';
+            $format = ($i % 2) === 0 ? '<blue>%s</>' : '<white>%s</>';
             $this->writeLn($line, $format);
         }
     }
@@ -147,6 +155,11 @@ class Output
         return $this;
     }
 
+    public function isAnsi(): bool
+    {
+        return $this->ansi;
+    }
+
     public function ask(string $question, string $default = ''): string
     {
         $isInteractive = $this->isInteractiveInput($this->input);
@@ -158,7 +171,8 @@ class Output
         $this->writeLn($question);
         $this->write('<cyan>❯</> ');
 
-        return trim(strval(fgets($this->input)));
+        $answer = trim(strval(fgets($this->input)));
+        return $answer === '' ? $default : $answer;
     }
 
     public function askYesNo(string $question, bool $answer = false, string $yes = 'Yes', string $no = 'No'): bool
@@ -208,7 +222,7 @@ class Output
         }
 
         if (is_string($this->sttyMode)) {
-            $this->exec('stty ' . $this->sttyMode);
+            $this->exec('stty ' . escapeshellarg(trim($this->sttyMode)));
         }
         $this->write('<up_2><eraseToBottom>');
 
@@ -218,7 +232,7 @@ class Output
         return $answer;
     }
 
-    public function secret(string $question, mixed $default = ''): string
+    public function secret(string $question, string $default = ''): string
     {
         $isInteractive = $this->isInteractiveInput($this->input);
 
@@ -230,12 +244,17 @@ class Output
         $this->write('<yellow>❯</> ');
 
         $this->exec('stty -echo');
-        $answer = trim(strval(fgets($this->input)));
-        $this->exec('stty echo');
+        try {
+            $answer = trim(strval(fgets($this->input)));
+        } finally {
+            $this->exec(is_string($this->sttyMode) ? 'stty ' . escapeshellarg(trim($this->sttyMode)) : 'stty echo');
+            $this->newLine();
+        }
 
-        return $answer;
+        return $answer === '' ? $default : $answer;
     }
 
+    /** @param list<string> $options */
     public function choice(string $text, array $options, bool $isRequired = true): string
     {
         $val = $this->select($text, $options, [], $isRequired, false);
@@ -243,22 +262,26 @@ class Output
         return (string) current($val);
     }
 
+    /**
+     * @param list<string> $options
+     * @param list<int> $selectedIndex
+     * @return array<int, string>
+     */
     public function select(
         string $text,
         array $options,
         array $selectedIndex = [],
         bool $isRequired = true,
-        bool $isMultiple = true
+        bool $isMultiple = true,
     ): array {
+        if ($options === []) {
+            return [];
+        }
         $isInteractive = $this->isInteractiveInput($this->input);
         $selected = array_fill_keys($selectedIndex, true);
 
         if (!$isInteractive) {
-            return array_filter(
-                $options,
-                fn (int $index) => isset($selected[$index]),
-                ARRAY_FILTER_USE_KEY
-            );
+            return array_filter($options, fn(int $index) => isset($selected[$index]), ARRAY_FILTER_USE_KEY);
         }
 
         $this->writeLn($text, '<cyan>%s</>');
@@ -342,67 +365,48 @@ class Output
         }
 
         if (is_string($this->sttyMode)) {
-            $this->exec('stty ' . $this->sttyMode);
+            $this->exec('stty ' . escapeshellarg(trim($this->sttyMode)));
         }
 
-        return array_filter(
-            $options,
-            fn (int $index) => isset($selected[$index]),
-            ARRAY_FILTER_USE_KEY
-        );
+        return array_filter($options, fn(int $index) => isset($selected[$index]), ARRAY_FILTER_USE_KEY);
     }
 
     public function width(): int
     {
-        return (int) trim(strval($this->exec('tput cols')));
+        $width = (int) $this->exec('tput cols');
+        return $width > 0 ? $width : 80;
     }
 
     public function height(): int
     {
-        return (int) trim(strval($this->exec('tput lines')));
+        $height = (int) $this->exec('tput lines');
+        return $height > 0 ? $height : 24;
     }
 
-    private function exec(string $command): bool|null|string
+    private function exec(string $command): bool|string|null
     {
         if ($this->useExec === false) {
             return null;
         }
 
-        return __execCommand($command);
+        return __execCommand($command . (PHP_OS_FAMILY === 'Windows' ? ' 2>NUL' : ' 2>/dev/null'));
     }
 
+    /** @param resource $inputStream */
     private function isInteractiveInput(mixed $inputStream): bool
     {
-        // Check if the stream is stdin
-        if ('php://stdin' !== (stream_get_meta_data($inputStream)['uri'])) {
-            return false;
-        }
-
-        // Try stream_isatty first as it's the most reliable
-        if (\function_exists('stream_isatty')) {
-            return @stream_isatty($inputStream);
-        }
-
-        // Fallback to posix_isatty if available
-        if (\function_exists('posix_isatty')) {
-            return @posix_isatty($inputStream);
-        }
-
-        // Last resort - check if stty command works
-        if (!\function_exists('exec')) {
-            return true;
-        }
-
-        exec('stty 2> /dev/null', $output, $status);
-        return $status !== 1;
+        return $this->useExec && PHP_OS_FAMILY !== 'Windows' && stream_isatty($inputStream);
     }
 
     private function readKeyPress(): ?string
     {
         // Read 3 or 4 bytes for the escape-sequence of the arrows
         $key = fread($this->input, 4);
-        if (empty($key)) {
-            return null;
+        if ($key === false || $key === '') {
+            if (is_string($this->sttyMode)) {
+                $this->exec('stty ' . escapeshellarg(trim($this->sttyMode)));
+            }
+            throw new \RuntimeException('Input stream closed while waiting for a key');
         }
 
         $k0 = ord($key[0]);
@@ -416,7 +420,7 @@ class Output
         }
 
         // Handle arrow keys and other special keys
-        if ($k0 === 27 && isset($key[1], $key[2])) { // ESC sequence
+        if ($k0 === 27 && strlen($key) >= 3) { // ESC sequence
             $k1 = ord($key[1]);
             $k2 = ord($key[2]);
 
@@ -428,7 +432,7 @@ class Output
                     68 => 'LEFT',
                     32 => 'SPACE',
                     10 => 'ENTER',
-                    default => null
+                    default => null,
                 };
             }
         }
@@ -505,11 +509,7 @@ class Output
 
         $text = str_replace('<br>', PHP_EOL, $text);
 
-        return str_replace(
-            array_keys(self::$formats),
-            $this->ansi ? array_values(self::$formats) : '',
-            $text
-        );
+        return str_replace(array_keys(self::$formats), $this->ansi ? array_values(self::$formats) : '', $text);
     }
 
     /**
@@ -517,7 +517,7 @@ class Output
      */
     public static function clearColor(string $str): string
     {
-        $patterns = "/\e?\[[\d;]+m/";
+        $patterns = "/\e\[[\d;]*m/";
 
         return (string) preg_replace($patterns, '', $str);
     }

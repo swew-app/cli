@@ -8,7 +8,9 @@ use Swew\Cli\Terminal\Output;
 
 class TestHelper
 {
+    /** @var resource */
     private $input;
+    /** @var resource */
     private $output;
 
     public function __construct()
@@ -25,11 +27,7 @@ class TestHelper
 
     public function getOutput(bool $ansi = false): Output
     {
-        $output = new Output(
-            $this->input,
-            $this->output,
-            false
-        );
+        $output = new Output($this->input, $this->output, false);
 
         $output->setAnsi($ansi);
 
@@ -45,6 +43,7 @@ class TestHelper
     public function clearOutput(): void
     {
         ftruncate($this->output, 0);
+        rewind($this->output);
     }
 
     public function getOutputContentAndClear(): bool|string

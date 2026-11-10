@@ -150,6 +150,26 @@ it('CommandArgument isArray 3', function () {
 });
 // */
 
+it('array arguments default to an empty array and append every value', function () {
+    $arg = new CommandArgument('--id=[] (int)');
+    expect($arg->getValue())->toBe([]);
+    $arg->setValue([1, 2]);
+    $arg->setValue([3, 4]);
+    expect($arg->getValue())->toBe([1, 2, 3, 4]);
+});
+
+it('missing option values do not consume flags and reparsing clears old values', function () {
+    $arg = new CommandArgument('--id');
+    $arg->parseInput(['--id', '--silent']);
+    expect($arg->isValid())->toBe(false);
+    $arg->parseInput(['--id', '-12']);
+    expect($arg->getValue())->toBe('-12');
+    $arg->parseInput([]);
+    expect($arg->isValid())->toBe(false);
+    $arg->parseInput(['--', '--id=123']);
+    expect($arg->isValid())->toBe(false);
+});
+
 //*
 it('CommandArgument parseInput 1.1', function () {
     $str = 'id';
@@ -222,4 +242,5 @@ it('CommandArgument parseInput 4.1', function () {
 
     expect($arg->getValue())->toBe([true]);
 });
+
 // */

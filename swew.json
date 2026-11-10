@@ -7,11 +7,11 @@
         ],
         "bail": false,
         "log": {
-            "logo": true,
-            "color": true,
+            "logo": false,
+            "color": false,
             "traceReverse": true,
-            "clear": true,
-            "short": false
+            "clear": false,
+            "short": true
         }
     }
 }

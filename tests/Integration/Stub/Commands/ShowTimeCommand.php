@@ -8,8 +8,8 @@ use Swew\Cli\Command;
 
 class ShowTimeCommand extends Command
 {
-    public const NAME = "show:time
-    {prefix}";
+    public const NAME = 'show:time
+    {prefix}';
 
     public const DESCRIPTION = 'The function shows the current time.';
 

@@ -6,6 +6,7 @@ namespace Swew\Cli\Command;
 
 class CommandArgument
 {
+    /** @var list<string> */
     private array $names = [];
 
     private mixed $parsedValue = null;
@@ -16,22 +17,19 @@ class CommandArgument
 
     public function __construct(
         string $declaration,
-        private readonly int $commandIndex = 0
+        private readonly int $commandIndex = 0,
     ) {
         $this->declaration = trim($declaration);
 
-        $part = current(explode('=', $this->getFirstPart(), 2));
+        $part = explode('=', $this->getFirstPart(), 2)[0];
 
-        $this->names = array_map(
-            fn (string $name) => trim(trim($name), '-'),
-            explode('|', $part)
-        );
+        $this->names = array_map(fn(string $name) => trim(trim($name), '-'), explode('|', $part));
     }
 
     private function getFirstPart(): string
     {
-        $part = current(explode(':', $this->declaration, 2));
-        return trim(current(explode('(', $part, 2)));
+        $part = explode(':', $this->declaration, 2)[0];
+        return trim(explode('(', $part, 2)[0]);
     }
 
     public function is(string $name): bool
@@ -50,16 +48,19 @@ class CommandArgument
 
     public function isRequired(): bool
     {
-        $str = current(explode(':', $this->declaration, 2));
+        $str = explode(':', $this->declaration, 2)[0];
         return !str_contains($str, '=');
     }
 
+    /** @param list<string> $args */
     public function parseInput(array $args): void
     {
-        $isCommand = !$this->isArgument();
+        $this->parsedValue = null;
 
-        if ($isCommand && isset($args[$this->commandIndex])) {
-            $this->setValue($args[$this->commandIndex]);
+        if (!$this->isArgument()) {
+            if (isset($args[$this->commandIndex])) {
+                $this->setValue($args[$this->commandIndex]);
+            }
             return;
         }
 
@@ -67,6 +68,12 @@ class CommandArgument
 
         // Loop through the arguments and parse them
         foreach ($args as $arg) {
+            if ($arg === '--') {
+                break;
+            }
+            if (str_starts_with($arg, '-') && !is_numeric($arg)) {
+                $isFind = false;
+            }
             if ($isFind) {
                 $this->setValue($arg);
                 $isFind = false;
@@ -115,7 +122,7 @@ class CommandArgument
                 $this->parsedValue = [];
             }
             if (is_array($val)) {
-                $this->parsedValue += $val;
+                $this->parsedValue = array_merge($this->parsedValue, $val);
             } else {
                 $this->parsedValue[] = $val;
             }
@@ -130,6 +137,10 @@ class CommandArgument
 
         if (!is_null($this->parsedValue)) {
             return $type->val($this->parsedValue);
+        }
+
+        if ($this->isArray()) {
+            return [];
         }
 
         $part = $this->getFirstPart();
@@ -160,7 +171,8 @@ class CommandArgument
     public function getType(): ArgType
     {
         if (is_null($this->currentType)) {
-            $part = current(explode(':', $this->declaration, 2));
+            $part = explode(':', $this->declaration, 2)[0];
+            $matches = [];
             preg_match('/\((.*?)\)/', $part, $matches);
 
             if (isset($matches[1])) {
@@ -202,17 +214,11 @@ class CommandArgument
 
     public function isArgument(): bool
     {
-        return $this->declaration[0] === '-';
+        return str_starts_with($this->declaration, '-');
     }
 
     public function getNames(): string
     {
-        return implode(
-            ',',
-            array_map(
-                fn ($n) => ($this->isArgument() ? "-$n" : $n),
-                $this->names
-            )
-        );
+        return implode(',', array_map(fn($n) => $this->isArgument() ? "-$n" : $n, $this->names));
     }
 }
