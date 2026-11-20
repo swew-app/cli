@@ -1,0 +1,4 @@
+{
+    "$schema": "/Users/avil/.cursor/extensions/phpactor.vscode-phpactor-1.7.5-universal/vendor/phpactor/phpactor/phpactor.schema.json",
+    "language_server_phpstan.enabled": false
+}

@@ -13,7 +13,6 @@ The package is a PHP library for building console applications and commands in a
 
 ---
 
-
 # Install
 
 ```sh
@@ -192,16 +191,16 @@ never exits the process. `run()` retains its existing process-exit behavior; pas
 
 This is a breaking v2 API, with no legacy adapter.
 
-| v1 | v2 |
-|---|---|
-| `extends Command`, `NAME`, `DESCRIPTION` | Plain class with `#[CliCommand]` |
-| `{--count=1 (int)}` declarations | `#[Argument] public int $count = 1;` |
-| `$this->output`, `arg()`, `argv()`, `call()`, `getArgs()`, `getCommander()` | Access through an injected `CommandCtx` |
-| `self::SUCCESS`, `self::ERROR` | `0`, `1` (or your own constants) |
-| Command `init()` | Move input-dependent setup into `__invoke()` |
-| Command `getHelpMessage($template)` | `$commander->getCommandHelpMessage($nameOrClass, $template)` |
-| `isValid()`, `getErrorMessage()`, argument setters | Input validation is performed before invocation |
-| `fillCommandArguments()` | Removed; use `call()` to execute prepared commands |
+| v1                                                                          | v2                                                           |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `extends Command`, `NAME`, `DESCRIPTION`                                    | Plain class with `#[CliCommand]`                             |
+| `{--count=1 (int)}` declarations                                            | `#[Argument] public int $count = 1;`                         |
+| `$this->output`, `arg()`, `argv()`, `call()`, `getArgs()`, `getCommander()` | Access through an injected `CommandCtx`                      |
+| `self::SUCCESS`, `self::ERROR`                                              | `0`, `1` (or your own constants)                             |
+| Command `init()`                                                            | Move input-dependent setup into `__invoke()`                 |
+| Command `getHelpMessage($template)`                                         | `$commander->getCommandHelpMessage($nameOrClass, $template)` |
+| `isValid()`, `getErrorMessage()`, argument setters                          | Input validation is performed before invocation              |
+| `fillCommandArguments()`                                                    | Removed; use `call()` to execute prepared commands           |
 
 Commander subclasses keep `init()`, `showHelp()`, and `getHelpMessage()`.
 Their protected `getCommand($name, $args = [])` now returns a prepared
@@ -232,6 +231,7 @@ $this->ctx->output->clear(); // Reset terminal window
 ```
 
 ## Width / Height
+
 ```php
 $this->ctx->output->width();
 $this->ctx->output->height();
@@ -256,17 +256,17 @@ $this->ctx->output->write('Hello world', $format);
 
 ### Colors
 
-| Color| Background Color|
-|---|---|
-| `<black>`  | `<bgBlack>`
-| `<gray>`   | `<bgGray>`
-| `<white>`  | `<bgWhite>`
-| `<red>`    | `<bgRed>`
-| `<green>`  | `<bgGreen>`
-| `<yellow>` | `<bgYellow>`
-| `<blue>`   | `<bgBlue>`
-| `<purple>` | `<bgPurple>`
-| `<cyan>`   | `<bgCyan>`
+| Color      | Background Color |
+| ---------- | ---------------- |
+| `<black>`  | `<bgBlack>`      |
+| `<gray>`   | `<bgGray>`       |
+| `<white>`  | `<bgWhite>`      |
+| `<red>`    | `<bgRed>`        |
+| `<green>`  | `<bgGreen>`      |
+| `<yellow>` | `<bgYellow>`     |
+| `<blue>`   | `<bgBlue>`       |
+| `<purple>` | `<bgPurple>`     |
+| `<cyan>`   | `<bgCyan>`       |
 
 ### Cursors
 
@@ -297,6 +297,7 @@ $this->ctx->output->clearColor($text); // no color string
 ```
 
 ## Empty lines
+
 ```php
 // Write a single blank line...
 $this->ctx->output->newLine(); 
@@ -305,6 +306,7 @@ $this->ctx->output->newLine(3);
 ```
 
 ## Link
+
 ```php
 $this->ctx->output->getLink($url, $text);
 ```
@@ -312,6 +314,7 @@ $this->ctx->output->getLink($url, $text);
 # Prompting For Input
 
 ## ask
+
 ```php
 public function __invoke(): int {
 	$name = $this->ctx->output->ask('What is your name?');
@@ -321,6 +324,7 @@ public function __invoke(): int {
 ```
 
 ## askYesNo
+
 ```php
 public function __invoke(): int {
 	$name = $this->ctx->output->askYesNo('Is this the best CLI utility?', true);
@@ -328,10 +332,11 @@ public function __invoke(): int {
 	return 0;
 }
 ```
+
 ![askYesNo](assets/askYesNo.avif)
 
-
 ## secret
+
 ```php
 public function __invoke(): int {
 	$password = $this->ctx->output->secret('What is the password?');
@@ -342,9 +347,9 @@ public function __invoke(): int {
 
 ## Choice Question
 
-|||
-|---|---|
-![choice-name](assets/choice-name.avif) | ![choice-name-result](assets/choice-name-result.avif)
+|                                         |                                                       |
+| --------------------------------------- | ----------------------------------------------------- |
+| ![choice-name](assets/choice-name.avif) | ![choice-name-result](assets/choice-name-result.avif) |
 
 ```php
 public function __invoke(): int {
@@ -416,7 +421,6 @@ foreach ($users as $user) {
 
 $bar->finish(); // remove progressbar
 ```
-
 
 # Output
 
